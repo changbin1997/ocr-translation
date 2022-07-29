@@ -1,8 +1,8 @@
 {
-  "name": "ocr-desktop",
+  "name": "ocr-translation",
   "author": "changbin1997",
   "version": "0.1.0",
-  "description": "OCR Desktop App",
+  "description": "一个 OCR 文字识别和翻译的程序",
   "main": "src/electron-main.js",
   "private": true,
   "scripts": {
@@ -49,8 +49,8 @@
     "not dead"
   ],
   "build": {
-    "appId": "ocr-desktop",
-    "productName": "ocr-desktop",
+    "appId": "ocr-translation",
+    "productName": "ocr-translation",
     "copyright": "Copyright © changbin1997",
     "compression": "maximum",
     "asar": true,
@@ -88,7 +88,8 @@
       "!**/public/**",
       "!**/dll/**",
       "!**/vue.config.js",
-      "!**/data.db"
+      "!**/data.db",
+      "!**/screenshot/**"
     ],
     "extraFiles": [
       {
