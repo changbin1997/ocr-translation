@@ -1,0 +1,110 @@
+{
+  "name": "ocr-desktop",
+  "author": "changbin1997",
+  "version": "0.1.0",
+  "description": "OCR Desktop App",
+  "main": "src/electron-main.js",
+  "private": true,
+  "scripts": {
+    "serve": "vue-cli-service serve",
+    "build": "vue-cli-service build",
+    "lint": "vue-cli-service lint",
+    "start": "electron .",
+    "pack": "vue-cli-service build && electron-builder --dir",
+    "dist": "vue-cli-service build && electron-builder"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.12.16",
+    "@babel/eslint-parser": "^7.12.16",
+    "@vue/cli-plugin-babel": "~5.0.0",
+    "@vue/cli-plugin-eslint": "~5.0.0",
+    "@vue/cli-service": "~5.0.0",
+    "core-js": "^3.8.3",
+    "electron": "^19.0.8",
+    "electron-builder": "^23.1.0",
+    "eslint": "^7.32.0",
+    "eslint-plugin-vue": "^8.0.3",
+    "vue": "^2.6.14",
+    "vue-router": "^3.5.1",
+    "vue-template-compiler": "^2.6.14",
+    "vuex": "^3.6.2"
+  },
+  "eslintConfig": {
+    "root": true,
+    "env": {
+      "node": true
+    },
+    "extends": [
+      "plugin:vue/essential",
+      "eslint:recommended"
+    ],
+    "parserOptions": {
+      "parser": "@babel/eslint-parser"
+    },
+    "rules": {}
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not dead"
+  ],
+  "build": {
+    "appId": "ocr-desktop",
+    "productName": "ocr-desktop",
+    "copyright": "Copyright © changbin1997",
+    "compression": "maximum",
+    "asar": true,
+    "win": {
+      "target": "nsis",
+      "legalTrademarks": "changbin1997"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": true,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": false
+    },
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "**/*",
+      "!**/node_modules/*/{CHANGELOG.md,README.md,README,readme.md,readme}",
+      "!**/node_modules/*/{test,__tests__,tests,powered-test,example,examples}",
+      "!**/node_modules/*.d.ts",
+      "!**/node_modules/.bin",
+      "!**/*.{iml,o,hprof,orig,pyc,pyo,rbc,swp,csproj,sln,xproj}",
+      "!.editorconfig",
+      "!**/._*",
+      "!**/{.DS_Store,.git,.hg,.svn,CVS,RCS,SCCS,.gitignore,.gitattributes}",
+      "!**/{__pycache__,thumbs.db,.flowconfig,.idea,.vs,.nyc_output}",
+      "!**/{appveyor.yml,.travis.yml,circle.yml}",
+      "!**/{npm-debug.log,yarn.lock,.yarn-integrity,.yarn-metadata.json}",
+      "!**/src/components/**",
+      "!**/src/assets/**",
+      "!**/src/main.js",
+      "!**/src/App.vue",
+      "!**/public/**",
+      "!**/dll/**",
+      "!**/vue.config.js",
+      "!**/data.db"
+    ],
+    "extraFiles": [
+      {
+        "from": "dll/PrintScr.exe",
+        "to": "dll/PrintScr.exe"
+      },
+      {
+        "from": "dll/PrScrn.dll",
+        "to": "dll/PrScrn.dll"
+      }
+    ]
+  },
+  "dependencies": {
+    "axios": "^0.27.2",
+    "baidu-aip-sdk": "^4.16.6",
+    "sqlite3": "^5.0.10",
+    "tencentcloud-sdk-nodejs": "^4.0.383"
+  }
+}
