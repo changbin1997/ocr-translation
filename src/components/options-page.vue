@@ -49,7 +49,7 @@
       </div>
       <div class="mb-4"></div>
       <!--OCR语音设置-->
-      <p class="mb-2"><b>OCR 语音朗读</b></p>
+      <p class="mb-2"><b>OCR 语音朗读设置</b></p>
       <div aria-label="OCR语音朗读" role="group">
         <div class="mb-3">
           <label for="ocr-volume" class="form-label">语音音量</label>
@@ -64,6 +64,9 @@
           <select id="ocr-voice-library" class="form-select" v-model="optionsSelected.ocrVoiceLibrarySelected">
             <option v-for="(item, index) of voiceLibraryList" :key="index" v-bind:value="item.name">{{item.name}} {{item.lang}}</option>
           </select>
+        </div>
+        <div class="mb-3">
+          <button type="button" class="btn btn-outline-primary" @click="voiceTest">测试语音朗读效果</button>
         </div>
       </div>
       <div class="mb-4"></div>
@@ -135,6 +138,8 @@
 </template>
 
 <script>
+import Voice from './../modules/voice';
+
 export default {
   name: 'options-page',
   data() {
@@ -175,6 +180,33 @@ export default {
     }
   },
   methods: {
+    // 测试语音朗读效果
+    voiceTest(ev) {
+      const text = '你好，很高兴认识你。Hello, Nice to meet you.';  // 语音测试朗读的内容
+      // 语音设置配置
+      const voiceOptions = {
+        volume: this.optionsSelected.ocrVoiceVolume / 10,
+        speed: this.optionsSelected.ocrVoiceSpeed,
+        voiceLibrary: this.optionsSelected.ocrVoiceLibrarySelected
+      };
+
+      const voice = new Voice(voiceOptions);
+      // 延迟开始朗读
+      setTimeout(() => {
+        // 开始朗读
+        voice.start({
+          text: text,
+          // 朗读开始
+          start: () => {
+            ev.target.disabled = true;
+          },
+          // 朗读停止
+          stop: () => {
+            ev.target.disabled = false;
+          }
+        });
+      }, 300);
+    },
     // 加载语音库列表
     loadVoiceLibraryList() {
       this.synth = window.speechSynthesis;

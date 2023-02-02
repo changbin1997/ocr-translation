@@ -72,7 +72,6 @@ export default {
     getTranslationData() {
       window.electronAPI.ipcRenderer.invoke('translationHistoryOverview').then(result => {
         this.baiduTranslation = result;
-        console.log(result);
       });
     },
     // 清空翻译历史记录

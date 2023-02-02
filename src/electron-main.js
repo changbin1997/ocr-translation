@@ -1,4 +1,4 @@
-const {app, BrowserWindow, globalShortcut, dialog} = require('electron');
+const {app, BrowserWindow, globalShortcut, dialog, Menu} = require('electron');
 const path = require('path');
 const ScreenshotOcr = require('./modules/screenshotOcr');  // 截图模块
 const Data = require('./modules/Data');  // 数据库操作模块
@@ -14,7 +14,7 @@ app.on('ready', async () => {
   mainWindow = new BrowserWindow({
     width: 1200,
     height: 720,
-    autoHideMenuBar: false,
+    autoHideMenuBar: true,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,
@@ -23,6 +23,9 @@ app.on('ready', async () => {
       webSecurity: false
     }
   });
+
+  // 隐藏菜单栏
+//Menu.setApplicationMenu(null);
 
   // 加载页面文件
   if (app.isPackaged) {
