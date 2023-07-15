@@ -37,10 +37,18 @@ module.exports = class Ocr {
           resolve(resultList);
         });
       }).catch(error => {
-        resolve({
-          msg: error.error_msg,
-          code: error.error_code
-        });
+        // 是否请求到百度服务器
+        if (error.error_msg !== undefined && error.error_code !== undefined) {
+          resolve({
+            msg: error.error_msg,
+            code: error.error_code
+          });
+        }else {
+          resolve({
+            msg: '无法访问百度 OCR 服务器！',
+            code: 0
+          });
+        }
       })
     });
   }
