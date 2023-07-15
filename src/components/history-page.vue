@@ -63,5 +63,7 @@ export default {
 #history-page {
   height: 100%;
   overflow-y: auto;
+  -webkit-user-select: none;
+  user-select: none;
 }
 </style>

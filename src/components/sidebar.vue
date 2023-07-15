@@ -39,6 +39,8 @@ aside {
   border-right: 1px solid #EEEEEE;
   display: flex;
   flex: none;
+  -webkit-user-select: none;
+  user-select: none;
 }
 aside .link-box {
   width: 100%;

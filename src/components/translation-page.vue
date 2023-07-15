@@ -300,6 +300,8 @@ export default {
   display: flex;
   justify-content: space-between;
   border-bottom: 1px solid #EEEEEE;
+  -webkit-user-select: none;
+  user-select: none;
 }
 /*工具栏的按钮*/
 #translation-page .toolbar button {

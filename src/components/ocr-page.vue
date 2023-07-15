@@ -361,6 +361,8 @@ export default {
   justify-content: space-between;
   align-items: center;
   border-bottom: 1px solid #EEEEEE;
+  -webkit-user-select: none;
+  user-select: none;
 }
 /*工具栏的按钮*/
 #ocr-page .toolbar button {
@@ -401,6 +403,8 @@ export default {
 /*图片显示区域*/
 .ocr-img-box {
   position: relative;
+  -webkit-user-select: none;
+  user-select: none;
 }
 /*上传指引*/
 .ocr-img-box .guide {

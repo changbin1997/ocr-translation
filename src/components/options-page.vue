@@ -277,4 +277,8 @@ export default {
   max-height: 100%;
   overflow-y: auto;
 }
+#options-page p,#options-page label {
+  -webkit-user-select: none;
+  user-select: none;
+}
 </style>
