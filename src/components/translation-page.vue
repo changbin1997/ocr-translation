@@ -39,7 +39,7 @@
     <!--输入和译文显示区域-->
     <div class="text-box">
       <div class="original-box">
-        <textarea class="form-control border" placeholder="请输入要翻译的内容" aria-label="原文" v-model="originalText" @contextmenu="contextMenu"></textarea>
+        <textarea @drop="dragFile" @dragover="preventDefault"  class="form-control border" placeholder="请输入要翻译的内容" aria-label="原文" v-model="originalText" @contextmenu="contextMenu"></textarea>
       </div>
       <div class="result-box">
         <textarea class="form-control border" aria-label="译文" v-model="resultText" aria-live="assertive" @contextmenu="contextMenu"></textarea>
@@ -125,6 +125,55 @@ export default {
     }
   },
   methods: {
+    // 拖拽翻译
+    dragFile(ev) {
+      ev.preventDefault();
+      ev.stopPropagation();
+      // 清空内容
+      this.clear();
+      // 获取文件
+      const file = ev.dataTransfer.files[0];
+
+      // 如果文件大小达到 10K 就显示警告
+      if (file.size >= 10240 && file.size < 51200) {
+        window.electronAPI.ipcRenderer.invoke('dialog', {
+          name: 'showMessageBox',
+          options: {
+            title: '文件过大',
+            message: '您选择的文件大小已经达到 10KB，可能会超出百度翻译 API 的字符数限制！',
+            buttons: ['知道了'],
+            type: 'warning',
+            noLink: true
+          }
+        });
+      }else if (file.size >= 51200) {
+        // 文件达到 50K 就不再往下执行
+        window.electronAPI.ipcRenderer.invoke('dialog', {
+          name: 'showMessageBox',
+          options: {
+            title: '文件过大',
+            message: '您选择的文件已经达到 50KB，已经超出了百度翻译 API 的字符数限制！',
+            buttons: ['知道了'],
+            type: 'error',
+            noLink: true
+          }
+        });
+        return false;
+      }
+
+      // 读取文件
+      const reader = new FileReader();
+      reader.readAsText(file);
+
+      reader.addEventListener('load', fileEv => {
+        this.originalText = fileEv.target.result;
+      });
+    },
+    // 阻止拖拽的默认事件
+    preventDefault(ev) {
+      ev.preventDefault();
+      ev.stopPropagation();
+    },
     // 提交翻译
     submit() {
       // 如果没有填写 API 密钥就弹出提示
