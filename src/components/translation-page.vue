@@ -3,11 +3,11 @@
     <div role="toolbar" class="toolbar px-1 bg-light">
       <!--原文操作区域-->
       <div class="btn-group btn-box">
-        <button type="button" class="btn btn-smy" :disabled="originalText.length < 1 && resultText.length < 1" @click="clear">
+        <button type="button" class="btn" :disabled="originalText.length < 1 && resultText.length < 1" @click="clear">
           <i class="icon-cross me-1"></i>
           <span>清空</span>
         </button>
-        <button type="button" class="btn btn-smy" :disabled="originalText.length < 1 || disabledVoiceBtn" @click="startVoice(originalText)">
+        <button type="button" class="btn" :disabled="originalText.length < 1 || disabledVoiceBtn" @click="startVoice(originalText)">
           <i class="icon-volume-medium me-1"></i>
           <span>朗读</span>
         </button>
@@ -26,13 +26,17 @@
       </div>
       <!--译文操作区域-->
       <div class="btn-group btn-box">
-        <button type="button" class="btn btn-smy" :disabled="resultText.length < 1 || disabledVoiceBtn" @click="startVoice(resultText)">
+        <button type="button" class="btn" :disabled="resultText.length < 1 || disabledVoiceBtn" @click="startVoice(resultText)">
           <i class="icon-volume-medium me-1"></i>
           <span>朗读</span>
         </button>
-        <button type="button" class="btn btn-smy" :disabled="resultText.length < 1" @click="copyText">
+        <button type="button" class="btn" :disabled="resultText.length < 1" @click="copyText">
           <i class="icon-copy me-1"></i>
           <span>拷贝</span>
+        </button>
+        <button type="button" class="btn" @click="exportMenu" id="export-btn" :disabled="resultText.length < 1">
+          <i class="icon-share me-1"></i>
+          <span>导出</span>
         </button>
       </div>
     </div>
@@ -121,10 +125,33 @@ export default {
       disabledSubmitBtn: false,
       voice: null,
       disabledVoiceBtn: false,
-      available: false
+      available: false,
+      translationResult: null
     }
   },
   methods: {
+    // 显示导出菜单
+    exportMenu(ev) {
+      if (this.translationResult === null) return false;
+      // 获取翻译结果
+      const exportResult = {
+        to: this.translationResult.to,
+        from: this.translationResult.from,
+        trans_result: this.translationResult.trans_result
+      };
+      // 设置语言名称
+      const from = this.languageList1.find(item => item.code === exportResult.from);
+      const to = this.languageList1.find(item => item.code === exportResult.to);
+      exportResult.from = `${from.name}（${from.code}）`;
+      exportResult.to = `${to.name}（${to.code}）`;
+      // 获取菜单弹出的位置
+      const rect = document.querySelector('#export-btn').getBoundingClientRect();
+      window.electronAPI.ipcRenderer.send('exportTranslationMenu', {
+        x: rect.left - 46,
+        y: rect.top + rect.height,
+        result: this.translationResult
+      });
+    },
     // 拖拽翻译
     dragFile(ev) {
       ev.preventDefault();
@@ -230,6 +257,7 @@ export default {
       // 提交翻译请求
       window.electronAPI.ipcRenderer.invoke('translation', submitData).then(result => {
         this.disabledSubmitBtn = false;
+        // 是否翻译出错
         if (result.code !== undefined && result.msg !== undefined) {
           window.electronAPI.ipcRenderer.invoke('dialog', {
             name: 'showMessageBox',
@@ -243,7 +271,13 @@ export default {
           });
           return false;
         }
-        this.resultText = result.join("\n");
+        // 显示译文
+        const resultList = [];
+        result.trans_result.forEach(val => {
+          resultList.push(val.dst);
+        });
+        this.resultText = resultList.join("\n");
+        this.translationResult = result;
         // 如果开启了翻译完成后自动朗读就朗读译文
         if (this.$store.state.options.translationAutoVoice) {
           this.startVoice(this.resultText);
@@ -255,6 +289,7 @@ export default {
       this.resultText = '';
       this.originalText = '';
       this.voice.stop();
+      this.translationResult = null;
     },
     // 开始语音朗读
     startVoice(text) {

@@ -2,7 +2,7 @@ const {dialog, ipcMain, BrowserWindow, clipboard, shell} = require('electron');
 const Ocr = require('./Ocr');  // OCR 模块
 const BaiduTranslation = require('./BaiduTranslation');  // 百度翻译模块
 const Data = require('./Data');  // 数据库操作模块
-const contextMenu = require('./contextMenu');  // 上下文菜单模块
+const ContextMenu = require('./contextMenu');  // 上下文菜单模块
 
 // 显示对话框
 ipcMain.handle('dialog', async (ev, args) => {
@@ -98,7 +98,13 @@ ipcMain.handle('deleteTencentOcrHistory', async () => {
 // 上下文菜单请求
 ipcMain.on('contextMenu', (ev, args) => {
   // 弹出上下文菜单
-  contextMenu(args.x, args.y);
+  ContextMenu.inputMenu(args.x, args.y);
+});
+
+// 导出翻译结果菜单请求
+ipcMain.on('exportTranslationMenu', (ev, args) => {
+  // 弹出用于导出翻译结果的菜单
+  ContextMenu.exportTranslationMenu(args.x, args.y, args.result);
 });
 
 // 通过浏览器打开链接地址

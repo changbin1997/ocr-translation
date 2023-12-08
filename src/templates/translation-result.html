@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{title}}</title>
+  <style type="text/css">
+    body {
+      display: flex;
+      justify-content: flex-start;
+      background: #F1F3F4;
+    }
+    #src, #dst {
+      width: 50%;
+      background: #FFFFFF;
+      margin: 20px;
+      padding: 20px;
+      box-shadow: 0 16px 24px 2px rgba(0,0,0,.14), 0 6px 30px 5px rgba(0,0,0,.12), 0 8px 10px -5px rgba(0,0,0,.2);
+    }
+    @media screen and (max-width: 768px) {
+      body {
+        display: block;
+      }
+      #src, #dst {
+        width: auto;
+        margin: 14px;
+      }
+    }
+  </style>
+</head>
+<body>
+<div id="src">
+  <h2>原文 {{from}}</h2>
+  <div id="src-text">{{src}}</div>
+</div>
+<div id="dst">
+  <h2>译文 {{to}}</h2>
+  <div id="src-text">{{dst}}</div>
+</div>
+</body>
+</html>

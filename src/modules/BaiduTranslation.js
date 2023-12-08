@@ -67,13 +67,7 @@ module.exports = class BaiduTranslation {
 
         // 添加到翻译历史记录
         this.data.addTranslationHistory('baidu', q.length).then(() => {
-          // 删除多余的数据
-          const resultList = [];
-          result.data.trans_result.forEach(item => {
-            resultList.push(item.dst);
-          });
-          // 返回翻译结果
-          resolve(resultList);
+          resolve(result.data);
         });
       }).catch(error => {
         if (error.response) {
