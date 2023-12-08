@@ -18,6 +18,10 @@
           <i class="icon-earth me-1"></i>
           <span>翻译</span>
         </button>
+        <button type="button" class="btn" id="export-btn" @click="exportMenu" :disabled="ocrText < 1">
+          <i class="icon-share me-1"></i>
+          <span>导出</span>
+        </button>
       </div>
       <div class="ocr-type-select">
         <label for="ocr-type-select" class="form-label me-2 mb-0">识别接口</label>
@@ -69,6 +73,20 @@ export default {
     }
   },
   methods: {
+    // 显示导出菜单
+    exportMenu() {
+      if (this.ocrText === '' || this.imgOptions.url === '') return false;
+
+      const ocrResult = {text: this.ocrText, img: this.imgOptions.url};
+
+      // 获取菜单弹出的位置
+      const rect = document.querySelector('#export-btn').getBoundingClientRect();
+      window.electronAPI.ipcRenderer.send('exportOcrMenu', {
+        x: rect.left,
+        y: rect.top + rect.height,
+        result: ocrResult
+      });
+    },
     // 显示文件对话框
     showFileDialog() {
       // 清空内容

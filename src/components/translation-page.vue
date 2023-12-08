@@ -149,7 +149,7 @@ export default {
       window.electronAPI.ipcRenderer.send('exportTranslationMenu', {
         x: rect.left - 46,
         y: rect.top + rect.height,
-        result: this.translationResult
+        result: exportResult
       });
     },
     // 拖拽翻译

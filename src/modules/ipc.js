@@ -107,6 +107,12 @@ ipcMain.on('exportTranslationMenu', (ev, args) => {
   ContextMenu.exportTranslationMenu(args.x, args.y, args.result);
 });
 
+// 导出 OCR 识别结果菜单请求
+ipcMain.on('exportOcrMenu', (ev, args) => {
+  // 弹出用于导出翻译结果的菜单
+  ContextMenu.exportOcrMenu(args.x, args.y, args.result);
+});
+
 // 通过浏览器打开链接地址
 ipcMain.on('openLink', (ev, args) => {
   shell.openExternal(args);

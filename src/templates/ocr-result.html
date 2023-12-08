@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{title}}</title>
+  <style type="text/css">
+    body {
+      display: flex;
+      justify-content: flex-start;
+      background: #F1F3F4;
+    }
+    #img-box,
+    #text {
+      width: 50%;
+      background: #FFFFFF;
+      margin: 20px;
+      padding: 20px;
+      box-shadow: 0 16px 24px 2px rgba(0, 0, 0, .14), 0 6px 30px 5px rgba(0, 0, 0, .12), 0 8px 10px -5px rgba(0, 0, 0, .2);
+    }
+    #img-box img {
+      max-width: 100%;
+      margin-bottom: 14px;
+    }
+    @media screen and (max-width: 768px) {
+      body {
+        display: block;
+      }
+      #img-box,
+      #text {
+        width: auto;
+        margin: 14px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="img-box">
+    <h2>识别图片</h2>
+    <img src="{{img}}" alt="识别图片">
+  </div>
+  <div id="text">
+    <h2>识别结果</h2>
+    <div>{{text}}</div>
+  </div>
+</body>
+</html>
