@@ -70,9 +70,3 @@ export default {
   }
 }
 </script>
-
-<style scoped>
-#ocr-history-table h2 {
-  font-size: 22px;
-}
-</style>

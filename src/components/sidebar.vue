@@ -9,6 +9,10 @@
         <i class="icon-earth"></i>
         <span>翻译</span>
       </router-link>
+      <router-link class="mb-2" :to="{name: 'favoritesPage'}" role="listitem" v-bind:class="{'link-active': $route.name === 'favoritesPage'}">
+        <i class="icon-star-full"></i>
+        <span>收藏</span>
+      </router-link>
       <router-link class="mb-2" :to="{name: 'historyPage'}" role="listitem" v-bind:class="{'link-active': $route.name === 'historyPage'}">
         <i class="icon-history"></i>
         <span>历史</span>

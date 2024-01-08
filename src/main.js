@@ -8,6 +8,7 @@ import translationPage from '@/components/translation-page';  // 翻译页
 import optionsPage from '@/components/options-page';  // 选项页
 import historyPage from '@/components/history-page';  // 历史记录页
 import aboutPage from '@/components/about-page';  // 关于页
+import favoritesPage from '@/components/favorites-page';
 import Vuex from 'vuex';
 
 Vue.use(routes);
@@ -40,6 +41,11 @@ const router = new routes({
       path: '/about-page',
       component: aboutPage,
       name: 'aboutPage'
+    },
+    {
+      path: '/favorites-page',
+      component: favoritesPage,
+      name: 'favoritesPage'
     }
   ]
 });

@@ -117,3 +117,21 @@ ipcMain.on('exportOcrMenu', (ev, args) => {
 ipcMain.on('openLink', (ev, args) => {
   shell.openExternal(args);
 });
+
+// 添加收藏
+ipcMain.handle('addToFavorites', async (ev, args) => {
+  const data = new Data();
+  return await data.addToFavorites(args);
+});
+
+// 获取收藏
+ipcMain.handle('getFavorites', async (ev, args) => {
+  const data = new Data();
+  return await data.getFavorites(args);
+});
+
+// 删除收藏
+ipcMain.handle('deleteFavorite', async (ev, args) => {
+  const data = new Data();
+  return await data.deleteFavorite(args);
+});

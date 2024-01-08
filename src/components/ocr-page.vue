@@ -2,23 +2,23 @@
   <div id="ocr-page">
     <div role="toolbar" class="toolbar px-1 bg-light">
       <div class="btn-group btn-box">
-        <button type="button" class="btn" @click="clear" :disabled="ocrText < 1">
+        <button type="button" title="清除图片和识别结果" class="btn" @click="clear" :disabled="ocrText < 1">
           <i class="icon-cross me-1"></i>
           <span>清空</span>
         </button>
-        <button type="button" class="btn" :disabled="ocrText < 1 || disabledVoiceBtn" @click="startVoice">
+        <button type="button" title="朗读识别结果" class="btn" :disabled="ocrText < 1 || disabledVoiceBtn" @click="startVoice">
           <i class="icon-volume-medium me-1"></i>
           <span>朗读</span>
         </button>
-        <button type="button" class="btn" :disabled="ocrText < 1" @click="copyText">
+        <button type="button" title="拷贝识别结果" class="btn" :disabled="ocrText < 1" @click="copyText">
           <i class="icon-copy me-1"></i>
           <span>拷贝</span>
         </button>
-        <button type="button" class="btn" :disabled="ocrText < 1" @click="toTranslationPage">
+        <button type="button" title="把识别结果翻译为其它语言" class="btn" :disabled="ocrText < 1" @click="toTranslationPage">
           <i class="icon-earth me-1"></i>
           <span>翻译</span>
         </button>
-        <button type="button" class="btn" id="export-btn" @click="exportMenu" :disabled="ocrText < 1">
+        <button type="button" title="把识别结果导出为 TXT 或 HTML" class="btn" id="export-btn" @click="exportMenu" :disabled="ocrText < 1">
           <i class="icon-share me-1"></i>
           <span>导出</span>
         </button>

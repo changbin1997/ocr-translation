@@ -16,6 +16,88 @@ module.exports = class Data {
     });
   }
 
+  // 删除翻译收藏
+  deleteFavorite(id) {
+    const sql = 'DELETE FROM favorites WHERE id = ?';
+    return new Promise(resolve => {
+      this.db.run(sql, [id], function(err) {
+        if (err) {
+          resolve(err);
+          return false;
+        }
+        resolve(this.changes);
+      });
+    });
+  }
+
+  // 获取翻译收藏
+  getFavorites(page) {
+    return new Promise(resolve => {
+      // 获取总数量
+      let count = null;
+      let sql = 'SELECT COUNT(*) AS count FROM favorites';
+      this.db.get(sql, (err, row) => {
+        if (err) {
+          resolve(err);
+          return false;
+        }
+        if (row.count < 1) resolve({count: row.count, list: []});
+        count = row.count;
+        // 如果有数据就继续查询
+        sql = `
+        SELECT id, language1 AS 'from', language2 AS 'to', src, dst, created FROM favorites
+        ORDER BY created DESC
+        LIMIT ?, ?
+        `;
+        this.db.all(sql, [page, 10], (err, rows) => {
+          if (err) {
+            resolve(err);
+            return false;
+          }
+          // 时间戳格式化
+          for (let i = 0;i < rows.length;i ++) {
+            rows[i].created = Datetime.timestampFormat(rows[i].created);
+          }
+
+          resolve({count: count, list: rows});
+        });
+      });
+    });
+  }
+
+  // 添加翻译收藏
+  addToFavorites(result) {
+    // 获取当前的时间戳
+    const timestamp = Datetime.timestamp();
+    
+    // 获取原文和译文
+    const src = [];
+    const dst = [];
+    result.trans_result.forEach(val => {
+      src.push(val.src);
+      dst.push(val.dst);
+    });
+
+    const sql = `
+    INSERT INTO favorites
+    (language1, language2, src, dst, created)
+    VALUES
+    (?, ?, ?, ?, ?)
+    `;
+    // 用于替换 SQL 占位符的数据
+    const value = [result.from, result.to, src.join("\n"), dst.join("\n"), timestamp];
+
+    return new Promise(resolve => {
+      this.db.run(sql, value, function(err) {
+        if (err) {
+          resolve({ count: 0, id: 0 });
+          return false;
+        }
+        resolve({ count: this.changes, id: this.lastID });
+      });
+    });
+  }
+
   // 保存选项
   updateOptions(options) {
     return new Promise(resolve => {
@@ -100,12 +182,12 @@ module.exports = class Data {
                 return false;
               }
               successCount ++;
-              if (successCount === 3) resolve(successCount);
+              if (successCount === 4) resolve(successCount);
             })
           });
         }else {
           successCount ++;
-          if (successCount === 3) resolve(successCount);
+          if (successCount === 4) resolve(successCount);
         }
       }).catch(error => {
         reject(error);
@@ -122,11 +204,11 @@ module.exports = class Data {
               return false;
             }
             successCount ++;
-            if (successCount === 3) resolve(successCount);
+            if (successCount === 4) resolve(successCount);
           });
         }else {
           successCount ++;
-          if (successCount === 3) resolve(successCount);
+          if (successCount === 4) resolve(successCount);
         }
       }).catch(error => {
         reject(error);
@@ -142,14 +224,42 @@ module.exports = class Data {
               return false;
             }
             successCount ++;
-            if (successCount === 3) resolve(successCount);
+            if (successCount === 4) resolve(successCount);
           });
         }else {
           successCount ++;
-          if (successCount === 3) resolve(successCount);
+          if (successCount === 4) resolve(successCount);
         }
       }).catch(error => {
         reject(error);
+      });
+
+      // 检查收藏数据表是否存在
+      this.favoritesTableExists().then(async count => {
+        // 出错就返回
+        if (count.message !== undefined) {
+          reject(count);
+          return false;
+        }
+        if (count < 1) {
+          // 如果不存在就创建数据表
+          const result = await this.createFavoritesTable();
+          if (result.message !== undefined) {
+            reject(result);
+            return false;
+          }
+
+          if (result < 1) {
+            reject({ errno: 'Database Error', code: '无法创建收藏数据表！' });
+            return false;
+          }
+
+          successCount ++;
+          if (successCount === 4) resolve(successCount);
+        }else {
+          successCount ++;
+          if (successCount === 4) resolve(successCount);
+        }
       });
     });
   }
@@ -263,6 +373,47 @@ module.exports = class Data {
           return false;
         }
         resolve(this.changes);
+      });
+    });
+  }
+
+  // 创建收藏数据表
+  createFavoritesTable() {
+    const sql = `
+    CREATE TABLE favorites (
+    id INTEGER PRIMARY KEY,
+    language1 VARCHAR (10) NOT NULL,
+    language2 VARCHAR (10) NOT NULL,
+    src VARCHAR NOT NULL,
+    dst VARCHAR NOT NULL,
+    created INTEGER NOT NULL DEFAULT 0
+    )
+    `;
+    return new Promise((resolve, reject) => {
+      this.db.run(sql, async err => {
+        if (err) {
+          resolve(err);
+          return false;
+        }
+        const result = await this.favoritesTableExists();
+        resolve(result);
+      });
+    });
+  }
+
+  // 收藏数据表是否存在
+  favoritesTableExists() {
+    const sql = `
+    SELECT COUNT(*) FROM sqlite_master
+    WHERE type="table" AND name="favorites"
+    `;
+    return new Promise((resolve) => {
+      this.db.get(sql, (err, row) => {
+        if (err) {
+          resolve(err);
+          return false;
+        }
+        resolve(row['COUNT(*)']);
       });
     });
   }

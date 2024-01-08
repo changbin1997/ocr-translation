@@ -3,13 +3,17 @@
     <div role="toolbar" class="toolbar px-1 bg-light">
       <!--原文操作区域-->
       <div class="btn-group btn-box">
-        <button type="button" class="btn" :disabled="originalText.length < 1 && resultText.length < 1" @click="clear">
+        <button type="button" title="清空原文和译文" class="btn" :disabled="originalText.length < 1 && resultText.length < 1" @click="clear">
           <i class="icon-cross me-1"></i>
           <span>清空</span>
         </button>
-        <button type="button" class="btn" :disabled="originalText.length < 1 || disabledVoiceBtn" @click="startVoice(originalText)">
+        <button type="button" title="朗读原文" class="btn" :disabled="originalText.length < 1 || disabledVoiceBtn" @click="startVoice(originalText)">
           <i class="icon-volume-medium me-1"></i>
           <span>朗读</span>
+        </button>
+        <button type="button" :class="{'text-primary': favorite}"  title="把本次翻译添加到收藏" class="btn" :disabled="translationResult === null || disabledVoiceBtn" @click="addToFavorites">
+          <i class="icon-star-full me-1"></i>
+          <span>收藏</span>
         </button>
       </div>
       <!--翻译语言选择区域-->
@@ -26,15 +30,15 @@
       </div>
       <!--译文操作区域-->
       <div class="btn-group btn-box">
-        <button type="button" class="btn" :disabled="resultText.length < 1 || disabledVoiceBtn" @click="startVoice(resultText)">
+        <button type="button" title="朗读译文" class="btn" :disabled="resultText.length < 1 || disabledVoiceBtn" @click="startVoice(resultText)">
           <i class="icon-volume-medium me-1"></i>
           <span>朗读</span>
         </button>
-        <button type="button" class="btn" :disabled="resultText.length < 1" @click="copyText">
+        <button type="button" title="拷贝译文" class="btn" :disabled="resultText.length < 1" @click="copyText">
           <i class="icon-copy me-1"></i>
           <span>拷贝</span>
         </button>
-        <button type="button" class="btn" @click="exportMenu" id="export-btn" :disabled="resultText.length < 1">
+        <button type="button" title="把本次翻译导出为 TXT 或 HTML" class="btn" @click="exportMenu" id="export-btn" :disabled="resultText.length < 1">
           <i class="icon-share me-1"></i>
           <span>导出</span>
         </button>
@@ -54,6 +58,7 @@
 
 <script>
 import Voice from './../modules/voice';
+import languageList from './../modules/language-list';
 
 export default {
   name: 'translation-page',
@@ -61,75 +66,90 @@ export default {
     return {
       languageSelected1: 'auto',
       languageSelected2: 'zh',
-      languageList1: [
-        {code: 'auto', name: '自动检测语言'},
-        {code: 'zh', name: '中文'},
-        {code: 'en', name: '英语'},
-        {code: 'yue', name: '粤语'},
-        {code: 'wyw', name: '文言文'},
-        {code: 'jp', name: '日语'},
-        {code: 'fra', name: '法语'},
-        {code: 'spa', name: '西班牙语'},
-        {code: 'th', name: '泰语'},
-        {code: 'ara', name: '阿拉伯语'},
-        {code: 'ru', name: '俄语'},
-        {code: 'pt', name: '葡萄牙语'},
-        {code: 'de', name: '德语'},
-        {code: 'it', name: '意大利语'},
-        {code: 'el', name: '希腊语'},
-        {code: 'nl', name: '荷兰语'},
-        {code: 'pl', name: '波兰语'},
-        {code: 'bul', name: '保加利亚语'},
-        {code: 'est', name: '爱沙尼亚语'},
-        {code: 'dan', name: '丹麦语'},
-        {code: 'fin', name: '芬兰语'},
-        {code: 'cs', name: '捷克语'},
-        {code: 'rom', name: '罗马尼亚语'},
-        {code: 'slo', name: '斯洛文尼亚语'},
-        {code: 'swe', name: '瑞典语'},
-        {code: 'hu', name: '匈牙利语'},
-        {code: 'cht', name: '繁体中文'},
-        {code: 'vie', name: '越南语'}
-      ],
-      languageList2: [
-        {code: 'zh', name: '中文'},
-        {code: 'en', name: '英语'},
-        {code: 'yue', name: '粤语'},
-        {code: 'wyw', name: '文言文'},
-        {code: 'jp', name: '日语'},
-        {code: 'fra', name: '法语'},
-        {code: 'spa', name: '西班牙语'},
-        {code: 'th', name: '泰语'},
-        {code: 'ara', name: '阿拉伯语'},
-        {code: 'ru', name: '俄语'},
-        {code: 'pt', name: '葡萄牙语'},
-        {code: 'de', name: '德语'},
-        {code: 'it', name: '意大利语'},
-        {code: 'el', name: '希腊语'},
-        {code: 'nl', name: '荷兰语'},
-        {code: 'pl', name: '波兰语'},
-        {code: 'bul', name: '保加利亚语'},
-        {code: 'est', name: '爱沙尼亚语'},
-        {code: 'dan', name: '丹麦语'},
-        {code: 'fin', name: '芬兰语'},
-        {code: 'cs', name: '捷克语'},
-        {code: 'rom', name: '罗马尼亚语'},
-        {code: 'slo', name: '斯洛文尼亚语'},
-        {code: 'swe', name: '瑞典语'},
-        {code: 'hu', name: '匈牙利语'},
-        {code: 'cht', name: '繁体中文'},
-        {code: 'vie', name: '越南语'}
-      ],
+      languageList1: languageList.languageList1,
+      languageList2: languageList.languageList2,
       resultText: '',
       originalText: '',
       disabledSubmitBtn: false,
       voice: null,
       disabledVoiceBtn: false,
       available: false,
-      translationResult: null
+      translationResult: null,
+      favorite: false,
+      favoriteId: null
     }
   },
   methods: {
+    // 删除收藏
+    async deleteFavorite() {
+      if (this.favoriteId === null) return false;
+      const changes = await window.electronAPI.ipcRenderer.invoke('deleteFavorite', this.favoriteId);
+      // 删除出错
+      if (changes.message !== undefined || changes !== 1) {
+        window.electronAPI.ipcRenderer.invoke('dialog', {
+          name: 'showMessageBox',
+          options: {
+            title: '出错了',
+            message: changes.message !== undefined ? changes.message : '删除数据时发生未知错误！',
+            buttons: ['关闭'],
+            type: 'error',
+            noLink: true
+          }
+        });
+        return false;
+      }
+
+      window.electronAPI.ipcRenderer.invoke('dialog', {
+        name: 'showMessageBox',
+        options: {
+          title: '完成',
+          message: '您刚才添加到收藏的翻译已成功移除。',
+          buttons: ['关闭'],
+          type: 'info',
+          noLink: true
+        }
+      });
+
+      this.favoriteId = null;
+      this.favorite = false;
+    },
+    // 添加收藏
+    async addToFavorites() {
+      if (this.translationResult === null) return false;
+      // 如果已经收藏就移除收藏
+      if (this.favorite) {
+        this.deleteFavorite();
+      }else {
+        // 发送 IPC 请求
+        const result = await window.electronAPI.ipcRenderer.invoke('addToFavorites', this.translationResult);
+        // 是否添加成功
+        if (result.count === 1) {
+          window.electronAPI.ipcRenderer.invoke('dialog', {
+            name: 'showMessageBox',
+            options: {
+              title: '完成',
+              message: '本次翻译已添加到收藏，您可以在左侧的收藏中查看翻译收藏。',
+              buttons: ['关闭'],
+              type: 'info',
+              noLink: true
+            }
+          });
+          this.favorite = true;
+          this.favoriteId = result.id;
+        }else {
+          window.electronAPI.ipcRenderer.invoke('dialog', {
+            name: 'showMessageBox',
+            options: {
+              title: '出错了',
+              message: '添加收藏时发生错误！',
+              buttons: ['关闭'],
+              type: 'error',
+              noLink: true
+            }
+          });
+        }
+      }
+    },
     // 显示导出菜单
     exportMenu(ev) {
       if (this.translationResult === null) return false;
@@ -203,6 +223,10 @@ export default {
     },
     // 提交翻译
     submit() {
+      // 重置翻译结果和翻译收藏
+      this.translationResult = null;
+      this.favorite = false;
+      this.favoriteId = null;
       // 如果没有填写 API 密钥就弹出提示
       if (!this.available) {
         window.electronAPI.ipcRenderer.invoke('dialog', {
@@ -290,6 +314,8 @@ export default {
       this.originalText = '';
       this.voice.stop();
       this.translationResult = null;
+      this.favorite = false;
+      this.favoriteId = null;
     },
     // 开始语音朗读
     startVoice(text) {
