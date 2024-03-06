@@ -25,7 +25,7 @@ app.on('ready', async () => {
   });
 
   // 隐藏菜单栏
-//Menu.setApplicationMenu(null);
+  Menu.setApplicationMenu(null);
 
   // 加载页面文件
   if (app.isPackaged) {

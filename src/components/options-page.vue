@@ -35,6 +35,23 @@
         </div>
       </div>
       <div class="mb-4"></div>
+      <!--讯飞 OCR 接口-->
+      <p class="mb-2"><b>科大讯飞 OCR 接口</b></p>
+      <div aria-label="科大讯飞 OCR 接口" role="group">
+        <div class="mb-3">
+          <label for="xunfei-app-id" class="form-label">App ID</label>
+          <input type="text" id="xunfei-app-id" class="form-control" placeholder="科大讯飞 OCR 的 App ID" v-model="optionsSelected.xunfeiOcrAPPId">
+        </div>
+        <div class="mb-3">
+          <label for="xunfei-secret" class="form-label">Secret</label>
+          <input type="text" id="xunfei-secret" class="form-control" placeholder="科大讯飞 OCR 的 Secret" v-model="optionsSelected.xunfeiOcrAPISecret">
+        </div>
+        <div class="mb-3">
+          <label for="xunfei-api-key" class="form-label">API Key</label>
+          <input type="text" id="xunfei-api-key" class="form-control" placeholder="科大讯飞 OCR 的 API Key" v-model="optionsSelected.xunfeiOcrAPIKey">
+        </div>
+      </div>
+      <div class="mb-4"></div>
       <!--百度翻译接口-->
       <p class="mb-2"><b>百度翻译接口</b></p>
       <div aria-label="百度翻译接口" role="group">
@@ -145,6 +162,9 @@ export default {
   data() {
     return {
       optionsSelected: {
+        xunfeiOcrAPPId: '',
+        xunfeiOcrAPISecret: '',
+        xunfeiOcrAPIKey: '',
         baiduOcrAppID: '',
         baiduOcrApiKey : '',
         baiduOcrSecretKey: '',
@@ -173,7 +193,8 @@ export default {
         {provider: 'tencent', name: '腾讯云通用印刷体识别'},
         {provider: 'tencent', name: '腾讯云通用印刷体识别（高精度版）'},
         {provider: 'tencent', name: '腾讯云通用手写体识别'},
-        {provider: 'tencent', name: '腾讯云广告文字识别'}
+        {provider: 'tencent', name: '腾讯云广告文字识别'},
+        {provider: 'xunfei', name: '科大讯飞通用文字识别'}
       ],
       synth: null,
       disabledSaveBtn: false

@@ -22,7 +22,12 @@ ipcMain.handle('fileToBase64', (ev, args) => {
 // OCR识别
 ipcMain.handle('ocr', async (ev, args) => {
   const ocr = new Ocr(args.options);
-  return await ocr[args.provider](args.type, args.base64File);
+  // 是否是讯飞 OCR
+  if (args.provider === 'xunfei') {
+    return await ocr.xunfei(args.type, args.base64File, args.imgType);
+  }else {
+    return await ocr[args.provider](args.type, args.base64File);
+  }
 });
 
 // 拷贝文本到剪贴板
@@ -53,9 +58,12 @@ ipcMain.handle('ocrHistoryOverview', async () => {
   const data = new Data();
   const baiduData = await data.getBaiduOcrHistoryOverview();
   const tencentData = await data.getTencentOcrHistoryOverview();
+  const xunfeiData = await data.getXunfeiOcrHistoryOverview();
+
   return {
     baidu: baiduData,
-    tencent: tencentData
+    tencent: tencentData,
+    xunfei: xunfeiData
   };
 });
 
@@ -86,13 +94,19 @@ ipcMain.handle('deleteAllTranslationHistory', async () => {
 // 清空百度 OCR 历史记录
 ipcMain.handle('deleteAllBaiduOcrHistory', async () => {
   const data = new Data();
-  return await  data.deleteAllBaiduOcrHistory();
+  return await data.deleteAllBaiduOcrHistory();
 });
 
 // 清空腾讯 OCR 历史记录
 ipcMain.handle('deleteTencentOcrHistory', async () => {
   const data = new Data();
-  return await  data.deleteTencentOcrHistory();
+  return await data.deleteTencentOcrHistory();
+});
+
+// 清空讯飞 OCR 历史记录
+ipcMain.handle('deleteXunfeiOcrHistory', async () => {
+  const data = new Data();
+  return await data.deleteAllXunfeiOcrHistory();
 });
 
 // 上下文菜单请求

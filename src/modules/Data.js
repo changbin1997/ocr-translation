@@ -177,7 +177,7 @@ module.exports = class Data {
             }
             // 写入默认选项
             this.insertOptions().then(count => {
-              if (count < 20) {
+              if (count < 23) {
                 reject({errno: 'Database Error', code: '无法创建选项数据表！'});
                 return false;
               }
@@ -268,6 +268,9 @@ module.exports = class Data {
   insertOptions() {
     // 默认选项
     const options = {
+      xunfeiOcrAPPId: '',
+      xunfeiOcrAPISecret: '',
+      xunfeiOcrAPIKey: '',
       baiduOcrAppID: '',
       baiduOcrApiKey : '',
       baiduOcrSecretKey: '',
@@ -537,6 +540,51 @@ module.exports = class Data {
         WHERE name = ? AND ocr_time > ?
         `,
         values: ['腾讯云广告文字识别', monthFirstDay]
+      }
+    ];
+
+    return new Promise(resolve => {
+      // 执行 SQL
+      sqlList.forEach(item => {
+        this.db.get(item.sql, item.values, (err, row) => {
+          dataList.push({
+            name: item.name,
+            count: row['COUNT(*)']
+          });
+          if (dataList.length >= sqlList.length) resolve(dataList);
+        });
+      });
+    });
+  }
+
+  // 清空讯飞 OCR 记录
+  deleteAllXunfeiOcrHistory() {
+    const sql = 'DELETE FROM ocr_history WHERE provider = ?';
+    return new Promise(resolve => {
+      this.db.run(sql, ['xunfei'], function() {
+        resolve(this.changes);
+      });
+    });
+  }
+
+  // 获取讯飞 OCR 记录总览
+  getXunfeiOcrHistoryOverview() {
+    const dataList = [];  // 用来存储查询出的数据
+    const monthFirstDay = Datetime.monthFirstDayTimestamp();
+    // 要执行的 SQL
+    const sqlList = [
+      {
+        name: '讯飞通用文字识别总使用量',
+        sql: `SELECT COUNT(*) FROM ocr_history WHERE provider = ?`,
+        values: ['xunfei']
+      },
+      {
+        name: '本月讯飞通用文字识别使用量',
+        sql: `
+        SELECT COUNT(*) FROM ocr_history
+        WHERE provider = ? AND ocr_time > ?
+        `,
+        values: ['xunfei', monthFirstDay]
       }
     ];
 

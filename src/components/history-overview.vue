@@ -32,6 +32,22 @@
       </div>
     </div>
     <hr>
+    <h2 class="mb-3">科大讯飞 OCR 记录</h2>
+    <div class="row">
+      <div class="col-lg-3 col-xl-2 col-md-4 mb-3" v-for="(item, index) of xunfei" :key="index">
+        <div class="data-box">
+          <h3 class="text-center">{{item.count}}</h3>
+          <p class="text-center mb-2">{{item.name}}</p>
+        </div>
+      </div>
+      <div class="col-lg-3 col-xl-2 col-md-4 mb-3" v-if="xunfei.length">
+        <div class="data-box" tabindex="0" role="button" @click="deleteXunfeiOcrHistory">
+          <h3 class="text-center">删除</h3>
+          <p class="text-center mb-2">删除讯飞OCR数据</p>
+        </div>
+      </div>
+    </div>
+    <hr>
     <h2 class="mb-3">百度翻译记录</h2>
     <div class="row">
       <div class="col-lg-3 col-xl-2 col-md-4 mb-3" v-for="(item, index) of baiduTranslation" :key="index">
@@ -57,6 +73,7 @@ export default {
     return {
       baidu: [],
       tencent: [],
+      xunfei: [],
       baiduTranslation: []
     }
   },
@@ -66,6 +83,7 @@ export default {
       window.electronAPI.ipcRenderer.invoke('ocrHistoryOverview').then(result => {
         this.baidu = result.baidu;
         this.tencent = result.tencent;
+        this.xunfei = result.xunfei
       });
     },
     // 获取翻译总览数据
@@ -144,6 +162,42 @@ export default {
           });
         }
       });
+    },
+    // 清空讯飞 OCR 记录
+    async deleteXunfeiOcrHistory() {
+      // 检测是否有数据
+      let notData = true;
+      this.xunfei.forEach(item => {
+        if (item.count > 0) notData = false;
+      });
+      if (notData) return false;
+
+      // 删除确认
+      const result = await  window.electronAPI.ipcRenderer.invoke('dialog', {
+        name: 'showMessageBox',
+        options: {
+          title: '删除确认',
+          message: '您确定要删除所有讯飞 OCR 历史记录吗，删除后无法恢复？',
+          buttons: ['取消', '确定删除'],
+          type: 'warning',
+          noLink: true
+        }
+      })
+      if (result.response !== 1) return false;
+      // 删除
+      const deleteCount = await window.electronAPI.ipcRenderer.invoke('deleteXunfeiOcrHistory');
+      await window.electronAPI.ipcRenderer.invoke('dialog', {
+        name: 'showMessageBox',
+        options: {
+          title: '删除完成',
+          message: `已删除 ${deleteCount} 条讯飞 OCR 记录`,
+          buttons: ['关闭'],
+          type: 'info',
+          noLink: true
+        }
+      });
+      // 重新加载 OCR 记录
+      this.getOcrData();
     },
     // 清空腾讯 OCR 记录
     deleteTencentOcrHistory() {

@@ -3,6 +3,7 @@ const OcrClient = require('tencentcloud-sdk-nodejs').ocr.v20181119.Client;
 const fs = require('fs');
 const path = require('path');
 const Data = require('./Data');
+const XunfeiOcr = require('./XunfeiOcr');
 
 module.exports = class Ocr {
   options = null;
@@ -98,6 +99,17 @@ module.exports = class Ocr {
         });
       })
     });
+  }
+
+  // 讯飞 OCR 识别
+  async xunfei(type, base64File, imgType = 'png') {
+    const xunfeiOcr = new XunfeiOcr(this.options.xunfeiOcrAPPId, this.options.xunfeiOcrAPISecret, this.options.xunfeiOcrAPIKey);
+    const result = await xunfeiOcr.submit(base64File, imgType);
+    // 如果成功就添加 OCR 历史记录
+    if (result.msg === undefined && result.code === undefined) {
+      await this.data.addOcrHistory('xunfei', type);
+    }
+    return result;
   }
 
   // 读取文件并转换为 base64

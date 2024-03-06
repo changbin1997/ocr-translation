@@ -6,8 +6,8 @@ const Ocr = require('./Ocr');
 
 module.exports = class ScreenshotOcr {
   options = null;  // 选项
-  available = {baidu: false, tencent: false};  // 功能可用性
-  providerList = {baidu: '百度', tencent: '腾讯'};  // OCR 提供商名称
+  available = {baidu: false, tencent: false, xunfei: false};  // 功能可用性
+  providerList = {baidu: '百度', tencent: '腾讯', xunfei: '讯飞'};  // OCR 提供商名称
 
   constructor(options) {
     this.options = options;
@@ -26,6 +26,14 @@ module.exports = class ScreenshotOcr {
       this.options.tencentOcrSecretKey !== ''
     ) {
       this.available.tencent = true;
+    }
+    // 检查讯飞 OCR API 是否可用
+    if (
+      this.options.xunfeiOcrAPPId !== '' &&
+      this.options.xunfeiOcrAPISecret !== '' &&
+      this.options.xunfeiOcrAPIKey !== ''
+    ) {
+      this.available.xunfei = true;
     }
   }
 

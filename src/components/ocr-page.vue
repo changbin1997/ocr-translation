@@ -61,7 +61,8 @@ export default {
         {provider: 'tencent', name: '腾讯云通用印刷体识别'},
         {provider: 'tencent', name: '腾讯云通用印刷体识别（高精度版）'},
         {provider: 'tencent', name: '腾讯云通用手写体识别'},
-        {provider: 'tencent', name: '腾讯云广告文字识别'}
+        {provider: 'tencent', name: '腾讯云广告文字识别'},
+        {provider: 'xunfei', name: '科大讯飞通用文字识别'}
       ],
       ocrTypeSelectde: '百度通用OCR识别',
       showGuide: true,
@@ -69,7 +70,7 @@ export default {
       ocrText: '',
       voice: null,
       disabledVoiceBtn: false,
-      available: {baidu: false, tencent: false, detect: false}
+      available: {baidu: false, tencent: false, detect: false, xunfei: false}
     }
   },
   methods: {
@@ -126,72 +127,70 @@ export default {
       ev.stopPropagation();
     },
     // 提交
-    submit(fileName) {
+    async submit(fileName) {
       // 是否是图片
-      window.electronAPI.ipcRenderer.invoke('isImage', fileName).then(isImage => {
-        if (!isImage) {
-          // 不是图片文件
-          window.electronAPI.ipcRenderer.invoke('dialog', {
-            name: 'showMessageBox',
-            options: {
-              title: '不支持的图片文件！',
-              message: '您选择的图片文件暂不支持，目前只支持 jpg、jpeg、png 的图片！',
-              buttons: ['知道了'],
-              type: 'error',
-              noLink: true
-            }
-          });
-          return false;
-        }
-
-        // 显示图片
-        this.showGuide = false;
-        this.imgOptions.url = fileName;
-        this.imgOptions.show = true;
-        // 把图片转为 base64
-        window.electronAPI.ipcRenderer.invoke('fileToBase64', fileName).then(base64 => {
-          // 要提交的数据
-          const submitData = {
-            type: this.ocrTypeSelectde,
-            base64File: base64,
-            options: this.$store.state.options
-          };
-
-          // 获取 OCR 提供商
-          this.ocrType.forEach(item => {
-            if (item.name === this.ocrTypeSelectde) submitData.provider = item.provider;
-          });
-
-          // 提交
-          window.electronAPI.ipcRenderer.invoke('ocr', submitData).then(result => {
-            // 出错
-            if (result.code !== undefined && result.msg !== undefined) {
-              window.electronAPI.ipcRenderer.invoke('dialog', {
-                name: 'showMessageBox',
-                options: {
-                  title: '错误' + result.code,
-                  message: result.msg,
-                  buttons: ['关闭'],
-                  type: 'error',
-                  noLink: true
-                }
-              });
-              // 清除图片
-              this.clear();
-              return false;
-            }
-            // 把识别结果数组用换行符分隔转换为字符串
-            this.ocrText = result.join("\n");
-            // 如果开启了自动朗读就朗读 OCR 文字
-            if (this.$store.state.options.ocrAutoVoice) {
-              this.startVoice();
-            }else if (this.$store.state.options.autoTranslation) {
-              // 如果开启了自动翻译就转到翻译页
-              this.toTranslationPage();
-            }
-          });
+      const isImage = await window.electronAPI.ipcRenderer.invoke('isImage', fileName);
+      // 如果不是图片就返回
+      if (!isImage) {
+        await window.electronAPI.ipcRenderer.invoke('dialog', {
+          name: 'showMessageBox',
+          options: {
+            title: '不支持的图片文件！',
+            message: '您选择的图片文件暂不支持，目前只支持 jpg、jpeg、png 的图片！',
+            buttons: ['知道了'],
+            type: 'error',
+            noLink: true
+          }
         });
+        return false;
+      }
+      // 显示图片
+      this.showGuide = false;
+      this.imgOptions.url = fileName;
+      this.imgOptions.show = true;
+      // 把图片转为 base64
+      const base64 = await window.electronAPI.ipcRenderer.invoke('fileToBase64', fileName);
+      // 获取图片后缀
+      let imgType = fileName.match(/\.([^.]+)$/);
+      imgType = imgType ? imgType[1] : 'png';
+      // 要提交的数据
+      const submitData = {
+        type: this.ocrTypeSelectde,
+        base64File: base64,
+        options: this.$store.state.options,
+        imgType: imgType.replace('.', '')
+      };
+      // 获取 OCR 提供商
+      this.ocrType.forEach(item => {
+        if (item.name === this.ocrTypeSelectde) submitData.provider = item.provider;
       });
+      // 提交
+      const result = await window.electronAPI.ipcRenderer.invoke('ocr', submitData);
+      // 出错
+      if (result.code !== undefined && result.msg !== undefined) {
+        await window.electronAPI.ipcRenderer.invoke('dialog', {
+          name: 'showMessageBox',
+          options: {
+            title: '错误' + result.code,
+            message: result.msg,
+            buttons: ['关闭'],
+            type: 'error',
+            noLink: true
+          }
+        });
+        // 清除图片
+        this.clear();
+        return false;
+      }
+      // 把识别结果数组用换行符分隔转换为字符串
+      this.ocrText = result.join("\n");
+      // 如果开启了自动朗读就朗读 OCR 文字
+      if (this.$store.state.options.ocrAutoVoice) {
+        this.startVoice();
+      }else if (this.$store.state.options.autoTranslation) {
+        // 如果开启了自动翻译就转到翻译页
+        this.toTranslationPage();
+      }
     },
     // 清除识别结果
     clear() {
@@ -263,15 +262,23 @@ export default {
       ) {
         this.available.tencent = true;
       }
+      // 检查讯飞 OCR 密钥是否填写
+      if (
+          this.$store.state.options.xunfeiOcrAPPId !== "" &&
+          this.$store.state.options.xunfeiOcrAPISecret !== '' &&
+          this.$store.state.options.xunfeiOcrAPIKey !== ''
+      ) {
+        this.available.xunfei = true;
+      }
       // 把检测状态设置为 true
       this.available.detect = true;
       // 如果没有填写任何 API 信息就弹出提示
-      if (!this.available.baidu && !this.available.tencent) {
+      if (!this.available.baidu && !this.available.tencent && !this.available.xunfei) {
         window.electronAPI.ipcRenderer.invoke('dialog', {
           name: 'showMessageBox',
           options: {
             title: '没有填写 API 密钥',
-            message: '您还没有填写任何 OCR API 的密钥信息，目前 OCR 功能暂不可用，请在设置中填写 百度 或 腾讯 的 OCR 密钥信息！',
+            message: '您还没有填写任何 OCR API 的密钥信息，目前 OCR 功能暂不可用，请在设置中填写需要使用的 OCR 服务密钥信息！',
             buttons: ['知道了'],
             type: 'info',
             noLink: true
@@ -281,7 +288,7 @@ export default {
     },
     // 检查当前使用的 API 是否填写密钥信息
     apiAvailable() {
-      const providerName = {baidu: '百度', tencent: '腾讯'};
+      const providerName = {baidu: '百度', tencent: '腾讯', xunfei: '讯飞'};
       let status = true;
       // 获取 OCR 提供商
       for (let i = 0;i < this.ocrType.length;i ++) {
