@@ -46,6 +46,7 @@ module.exports = class XunfeiOcr {
         url: url,
         method: 'post',
         data: JSON.stringify(submitData),
+        timeout: 15000,
         headers: {
           'Content-Type': 'application/json'
         }

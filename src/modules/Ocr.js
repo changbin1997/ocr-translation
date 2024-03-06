@@ -1,4 +1,5 @@
 const AipOcrClient = require('baidu-aip-sdk').ocr;
+const HttpClient = require('baidu-aip-sdk').HttpClient;
 const OcrClient = require('tencentcloud-sdk-nodejs').ocr.v20181119.Client;
 const fs = require('fs');
 const path = require('path');
@@ -16,6 +17,9 @@ module.exports = class Ocr {
 
   // 百度 OCR 识别
   baidu(type, base64File) {
+    // 配置百度 SDK 的网络
+    HttpClient.setRequestOptions({timeout: 15000});
+
     const client = new AipOcrClient(this.options.baiduOcrAppID, this.options.baiduOcrApiKey, this.options.baiduOcrSecretKey);
 
     let result = null;
@@ -28,6 +32,12 @@ module.exports = class Ocr {
     // 调整返回的内容
     return new Promise((resolve) => {
       result.then(data => {
+        // 是否出错
+        if (data.error_msg !== undefined && data.error_code !== undefined) {
+          resolve({code: data.error_code, msg: data.error_msg});
+          return false;
+        }
+
         // 添加 OCR 历史记录
         this.data.addOcrHistory('baidu', type).then(() => {
           // 只返回识别内容数组
@@ -61,7 +71,12 @@ module.exports = class Ocr {
         secretId: this.options.tencentOcrSecretID,
         secretKey: this.options.tencentOcrSecretKey
       },
-      region: 'ap-guangzhou'
+      region: 'ap-guangzhou',
+      profile: {
+        httpProfile: {
+          reqTimeout: 15000
+        }
+      }
     });
     // 用来存储识别结果
     let result = null;
@@ -92,10 +107,10 @@ module.exports = class Ocr {
           });
           resolve(resultList);
         });
-      }).catch(() => {
+      }).catch(error => {
         resolve({
-          code: 'error',
-          msg: '请检查 appID、secretID、secretKey 是否有错误，相关功能是否开通！'
+          code: error.code,
+          msg: error.message
         });
       })
     });
