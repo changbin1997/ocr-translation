@@ -55,6 +55,7 @@ module.exports = class BaiduTranslation {
             code: 'Baidu server error',
             msg: '百度服务器返回的数据不是标准 JSON 格式！'
           });
+          return false;
         }
 
         // API出错
@@ -63,6 +64,7 @@ module.exports = class BaiduTranslation {
             code: result.data.error_code,
             msg: result.data.error_msg
           });
+          return  false;
         }
 
         // 添加到翻译历史记录

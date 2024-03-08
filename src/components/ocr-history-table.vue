@@ -12,7 +12,7 @@
       <tbody>
         <tr v-for="(item, index) of ocrList" :key="index">
           <td>{{item.name}}</td>
-          <td>{{item.provider}}</td>
+          <td>{{provider[item.provider]}}</td>
           <td>{{item.ocr_time}}</td>
         </tr>
       </tbody>
@@ -35,7 +35,8 @@ export default {
       count: 0,
       ocrList: [],
       pageCount: 0,
-      pageNum: 1
+      pageNum: 1,
+      provider: {baidu: '百度', tencent: '腾讯', xunfei: '科大讯飞'}
     }
   },
   methods: {

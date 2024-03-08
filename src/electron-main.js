@@ -7,6 +7,7 @@ const Data = require('./modules/Data');  // 数据库操作模块
 const data = new Data();
 
 let mainWindow;  // 用来保存主窗口对象的引用
+let disabled = false;  // 用于禁用截图识别
 
 // 当 Electron 完成初始化并准备创建浏览器窗口时被调用
 app.on('ready', async () => {
@@ -64,8 +65,22 @@ app.on('ready', async () => {
     if (options.keyF1Enable) {
       // F1快捷键事件
       globalShortcut.register('F1', async () => {
+        if (disabled) return false;
+        disabled = true;  // 正在识别时禁用截图
         const result = await screenshotOcr.ocr(options.keyF1Provider, options.keyF1Function);
+        disabled = false;  // 识别完成后恢复截图
+        // 取消截图
         if (result === null) return false;
+        if (result.code !== undefined && result.msg !== undefined) {
+          await dialog.showMessageBox(BrowserWindow.getFocusedWindow(), {
+            title: `错误：${result.code}`,
+            message: result.ms,
+            type: 'error',
+            buttons: ['关闭'],
+            noLink: true
+          })
+          return false;
+        }
         mainWindow.webContents.send('ocrResult', result);
       });
     }
@@ -73,8 +88,22 @@ app.on('ready', async () => {
     if (options.keyF2Enable) {
       // F2快捷键事件
       globalShortcut.register('F2', async () => {
+        if (disabled) return false;
+        disabled = true;  // 正在识别时禁用截图
         const result = await screenshotOcr.ocr(options.keyF2Provider, options.keyF2Function);
+        disabled = false;  // 识别完成后恢复截图
+        // 取消截图
         if (result === null) return false;
+        if (result.code !== undefined && result.msg !== undefined) {
+          await dialog.showMessageBox(BrowserWindow.getFocusedWindow(), {
+            title: `错误：${result.code}`,
+            message: result.ms,
+            type: 'error',
+            buttons: ['关闭'],
+            noLink: true
+          })
+          return false;
+        }
         mainWindow.webContents.send('ocrResult', result);
       });
     }

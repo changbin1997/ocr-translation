@@ -1,7 +1,7 @@
 const path = require('path');
 const fs = require('fs');
 const child_process = require('child_process');
-const {clipboard, dialog, BrowserWindow} = require('electron');
+const {clipboard} = require('electron');
 const Ocr = require('./Ocr');
 
 module.exports = class ScreenshotOcr {
@@ -38,57 +38,28 @@ module.exports = class ScreenshotOcr {
   }
 
   // 识别
-  ocr(provider, ocrType) {
-    return new Promise((resolve) => {
-      // 检查接口是否可用
-      if (!this.available[provider]) {
-        dialog.showMessageBox(BrowserWindow.getFocusedWindow(), {
-          title: `没有填写${this.providerList[provider]} API 密钥`,
-          message: `您还没有填写${this.providerList[provider]} API 密钥信息，${ocrType} 目前暂不可用！`,
-          type: 'info',
-          buttons: ['关闭'],
-          noLink: true
-        });
-        resolve(null);
-        return false;
-      }
-      // 调用截图
-      this.screenshot().then(img => {
-        const ocr = new Ocr(this.options);
-        ocr[provider](ocrType, img).then(result => {
-          if (result.code !== undefined && result.msg !== undefined) {
-            dialog.showMessageBox(BrowserWindow.getFocusedWindow(), {
-              title: '错误：' + result.code,
-              message: result.msg,
-              type: 'error',
-              buttons: ['关闭'],
-              noLink: true
-            });
-            resolve(null);
-            return false;
-          }
-          resolve({
-            img: img,
-            text: result
-          });
-        });
-      }).catch(error => {
-        if (typeof error === "string") {
-          dialog.showMessageBox(BrowserWindow.getFocusedWindow(), {
-            title: '出错了',
-            message: error,
-            type: 'error',
-            buttons: ['关闭'],
-            noLink: true
-          });
-        }
-      });
-    });
+  async ocr(provider, ocrType) {
+    // 检查接口是否可用
+    if (!this.available[provider]) {
+      return {code: 0, msg: `缺少 ${this.providerList[provider]} API 密钥！`};
+    }
+    // 调用截图
+    const img = await this.screenshot();
+    // 取消截图
+    if (img === null) return null;
+    // 截图出错
+    if (img.code !== undefined && img.msg !== undefined) return img;
+    // 调用 OCR 识别
+    const ocr = new Ocr(this.options);
+    const result = await ocr[provider](ocrType, img);
+    // 识别出错
+    if (result.code !== undefined && result.msg !== undefined) return result;
+    return {img: img, text: result};
   }
 
   // 截图
   screenshot() {
-    return new Promise((resolve, reject) => {
+    return new Promise(resolve => {
       // 截图 dll 位置
       const screenshotModule = {
         dll: path.join(process.cwd(), 'dll', 'PrScrn.dll'),
@@ -98,13 +69,13 @@ module.exports = class ScreenshotOcr {
       fs.exists(screenshotModule.exe, exists => {
         // 如果截图 exe 不存在就直接返回
         if (!exists) {
-          reject('找不到 ' + screenshotModule.exe + ' 文件！');
+          resolve({code: 0, msg: `找不到 ${screenshotModule.exe} 文件`});
           return false;
         }
         // 检测截图 dll 是否存在
         fs.exists(screenshotModule.dll, dllExists => {
           if (!dllExists) {
-            reject('找不到 ' + screenshotModule.dll + ' 文件！');
+            resolve({code: 0, msg: `找不到 ${screenshotModule.dll} 文件`});
             return false;
           }
           // 打开截图程序
@@ -118,6 +89,8 @@ module.exports = class ScreenshotOcr {
               // 把图片转为 base64
               img = img.toPNG().toString('base64');
               resolve(img);
+            }else {
+              resolve(null);
             }
           });
         });
