@@ -62,7 +62,8 @@ export default {
         {provider: 'tencent', name: '腾讯云通用印刷体识别（高精度版）'},
         {provider: 'tencent', name: '腾讯云通用手写体识别'},
         {provider: 'tencent', name: '腾讯云广告文字识别'},
-        {provider: 'xunfei', name: '科大讯飞通用文字识别'}
+        {provider: 'xunfei', name: '科大讯飞通用文字识别'},
+        {provider: 'youdao', name: '有道智云通用文字识别'}
       ],
       ocrTypeSelectde: '百度通用OCR识别',
       showGuide: true,
@@ -70,7 +71,7 @@ export default {
       ocrText: '',
       voice: null,
       disabledVoiceBtn: false,
-      available: {baidu: false, tencent: false, detect: false, xunfei: false}
+      available: {baidu: false, tencent: false, detect: false, xunfei: false, youdao: false}
     }
   },
   methods: {
@@ -270,10 +271,17 @@ export default {
       ) {
         this.available.xunfei = true;
       }
+      // 检查有道智云 OCR 密钥是否填写
+      if (
+          this.$store.state.options.youdaoOcrAppID !== '' &&
+          this.$store.state.options.youdaoOcrAppKey !== ''
+      ) {
+        this.available.youdao = true;
+      }
       // 把检测状态设置为 true
       this.available.detect = true;
       // 如果没有填写任何 API 信息就弹出提示
-      if (!this.available.baidu && !this.available.tencent && !this.available.xunfei) {
+      if (!this.available.baidu && !this.available.tencent && !this.available.xunfei && !this.available.youdao) {
         window.electronAPI.ipcRenderer.invoke('dialog', {
           name: 'showMessageBox',
           options: {

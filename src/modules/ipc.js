@@ -59,11 +59,13 @@ ipcMain.handle('ocrHistoryOverview', async () => {
   const baiduData = await data.getBaiduOcrHistoryOverview();
   const tencentData = await data.getTencentOcrHistoryOverview();
   const xunfeiData = await data.getXunfeiOcrHistoryOverview();
+  const youdaoData = await data.getYoudaoOcrHistoryOverview();
 
   return {
     baidu: baiduData,
     tencent: tencentData,
-    xunfei: xunfeiData
+    xunfei: xunfeiData,
+    youdao: youdaoData
   };
 });
 
@@ -91,22 +93,10 @@ ipcMain.handle('deleteAllTranslationHistory', async () => {
   return await  data.deleteAllTranslationHistory();
 });
 
-// 清空百度 OCR 历史记录
-ipcMain.handle('deleteAllBaiduOcrHistory', async () => {
+// 清空指定提供商的 OCR 历史记录
+ipcMain.handle('deleteOcrHistory', async (ev, args) => {
   const data = new Data();
-  return await data.deleteAllBaiduOcrHistory();
-});
-
-// 清空腾讯 OCR 历史记录
-ipcMain.handle('deleteTencentOcrHistory', async () => {
-  const data = new Data();
-  return await data.deleteTencentOcrHistory();
-});
-
-// 清空讯飞 OCR 历史记录
-ipcMain.handle('deleteXunfeiOcrHistory', async () => {
-  const data = new Data();
-  return await data.deleteAllXunfeiOcrHistory();
+  return await data.deleteAllOcrHistory(args);
 });
 
 // 上下文菜单请求

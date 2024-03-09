@@ -5,6 +5,7 @@ const fs = require('fs');
 const path = require('path');
 const Data = require('./Data');
 const XunfeiOcr = require('./XunfeiOcr');
+const YoudaoOcr = require('./YoudaoOcr');
 
 module.exports = class Ocr {
   options = null;
@@ -123,6 +124,17 @@ module.exports = class Ocr {
     // 如果成功就添加 OCR 历史记录
     if (result.msg === undefined && result.code === undefined) {
       await this.data.addOcrHistory('xunfei', type);
+    }
+    return result;
+  }
+
+  // 有道智云OCR
+  async youdao(type, base64File) {
+    const youdaoOcr = new YoudaoOcr(this.options.youdaoOcrAppID, this.options.youdaoOcrAppKey);
+    const result = await youdaoOcr.submit(base64File);
+    // 如果成功就添加 OCR 历史记录
+    if (result.msg === undefined && result.code === undefined) {
+      await this.data.addOcrHistory('youdao', type);
     }
     return result;
   }

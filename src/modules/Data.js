@@ -268,6 +268,8 @@ module.exports = class Data {
   insertOptions() {
     // 默认选项
     const options = {
+      youdaoOcrAppID: '',
+      youdaoOcrAppKey: '',
       xunfeiOcrAPPId: '',
       xunfeiOcrAPISecret: '',
       xunfeiOcrAPIKey: '',
@@ -480,16 +482,6 @@ module.exports = class Data {
     });
   }
 
-  // 清空腾讯 OCR 记录
-  deleteTencentOcrHistory() {
-    return new Promise(resolve => {
-      const sql = 'DELETE FROM ocr_history WHERE provider = ?';
-      this.db.run(sql, ['tencent'], function() {
-        resolve(this.changes);
-      });
-    });
-  }
-
   // 获取腾讯 OCR 记录总览
   getTencentOcrHistoryOverview() {
     const dataList = [];  // 用来存储查询出的数据
@@ -557,12 +549,47 @@ module.exports = class Data {
     });
   }
 
-  // 清空讯飞 OCR 记录
-  deleteAllXunfeiOcrHistory() {
+  // 清空指定提供商的 OCR 记录
+  deleteAllOcrHistory(provider) {
     const sql = 'DELETE FROM ocr_history WHERE provider = ?';
     return new Promise(resolve => {
-      this.db.run(sql, ['xunfei'], function() {
+      this.db.run(sql, [provider], function() {
         resolve(this.changes);
+      });
+    });
+  }
+
+  // 获取有道 OCR 记录总览
+  getYoudaoOcrHistoryOverview() {
+    const dataList = [];  // 用来存储查询出的数据
+    const monthFirstDay = Datetime.monthFirstDayTimestamp();
+    // 要执行的 SQL
+    const sqlList = [
+      {
+        name: '有道通用文字识别总使用量',
+        sql: `SELECT COUNT(*) FROM ocr_history WHERE provider = ?`,
+        values: ['youdao']
+      },
+      {
+        name: '本月有道通用文字识别使用量',
+        sql: `
+        SELECT COUNT(*) FROM ocr_history
+        WHERE provider = ? AND ocr_time > ?
+        `,
+        values: ['youdao', monthFirstDay]
+      }
+    ];
+
+    return new Promise(resolve => {
+      // 执行 SQL
+      sqlList.forEach(item => {
+        this.db.get(item.sql, item.values, (err, row) => {
+          dataList.push({
+            name: item.name,
+            count: row['COUNT(*)']
+          });
+          if (dataList.length >= sqlList.length) resolve(dataList);
+        });
       });
     });
   }
@@ -598,16 +625,6 @@ module.exports = class Data {
           });
           if (dataList.length >= sqlList.length) resolve(dataList);
         });
-      });
-    });
-  }
-
-  // 清空百度 OCR 记录
-  deleteAllBaiduOcrHistory() {
-    return new Promise(resolve => {
-      const sql = 'DELETE FROM ocr_history WHERE provider = ?';
-      this.db.run(sql, ['baidu'], function() {
-        resolve(this.changes);
       });
     });
   }

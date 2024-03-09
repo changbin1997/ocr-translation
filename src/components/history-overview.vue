@@ -9,7 +9,7 @@
         </div>
       </div>
       <div class="col-lg-3 col-xl-2 col-md-4 mb-3" v-if="baidu.length">
-        <div class="data-box" tabindex="0" role="button" @click="deleteAllBaiduOcrHistory">
+        <div class="data-box" tabindex="0" role="button" @click="deleteOcrHistory('baidu')">
           <h3 class="text-center">删除</h3>
           <p class="text-center mb-2">删除百度OCR数据</p>
         </div>
@@ -25,7 +25,7 @@
         </div>
       </div>
       <div class="col-lg-3 col-xl-2 col-md-4 mb-3" v-if="baidu.length">
-        <div class="data-box" tabindex="0" role="button" @click="deleteTencentOcrHistory">
+        <div class="data-box" tabindex="0" role="button" @click="deleteOcrHistory('tencent')">
           <h3 class="text-center">删除</h3>
           <p class="text-center mb-2">删除腾讯OCR数据</p>
         </div>
@@ -41,9 +41,25 @@
         </div>
       </div>
       <div class="col-lg-3 col-xl-2 col-md-4 mb-3" v-if="xunfei.length">
-        <div class="data-box" tabindex="0" role="button" @click="deleteXunfeiOcrHistory">
+        <div class="data-box" tabindex="0" role="button" @click="deleteOcrHistory('xunfei')">
           <h3 class="text-center">删除</h3>
           <p class="text-center mb-2">删除讯飞OCR数据</p>
+        </div>
+      </div>
+    </div>
+    <hr>
+    <h2 class="mb-3">有道智云 OCR 记录</h2>
+    <div class="row">
+      <div class="col-lg-3 col-xl-2 col-md-4 mb-3" v-for="(item, index) of youdao" :key="index">
+        <div class="data-box">
+          <h3 class="text-center">{{item.count}}</h3>
+          <p class="text-center mb-2">{{item.name}}</p>
+        </div>
+      </div>
+      <div class="col-lg-3 col-xl-2 col-md-4 mb-3" v-if="xunfei.length">
+        <div class="data-box" tabindex="0" role="button" @click="deleteOcrHistory('youdao')">
+          <h3 class="text-center">删除</h3>
+          <p class="text-center mb-2">删除有道OCR数据</p>
         </div>
       </div>
     </div>
@@ -74,6 +90,7 @@ export default {
       baidu: [],
       tencent: [],
       xunfei: [],
+      youdao: [],
       baiduTranslation: []
     }
   },
@@ -83,8 +100,47 @@ export default {
       window.electronAPI.ipcRenderer.invoke('ocrHistoryOverview').then(result => {
         this.baidu = result.baidu;
         this.tencent = result.tencent;
-        this.xunfei = result.xunfei
+        this.xunfei = result.xunfei;
+        this.youdao = result.youdao;
       });
+    },
+    // 清空 OCR 历史记录
+    async deleteOcrHistory(provider) {
+      // 检查是否有数据
+      let count = 0;
+      this[provider].forEach(val => {
+        count += val.count;
+      });
+      if (count < 1) return false;
+
+      // 删除确认
+      const providerName = {baidu: '百度', tencent: '腾讯', xunfei: '讯飞', youdao: '有道'};
+      const result = await window.electronAPI.ipcRenderer.invoke('dialog', {
+        name: 'showMessageBox',
+        options: {
+          title: '删除确认',
+          message: `'您确定要删除所有 ${providerName[provider]} OCR 历史记录吗，删除后无法恢复？`,
+          buttons: ['取消', '确定删除'],
+          type: 'warning',
+          noLink: true
+        }
+      });
+      if (result.response !== 1) return false;
+
+      // 删除
+      const deleteResult = await window.electronAPI.ipcRenderer.invoke('deleteOcrHistory', provider);
+      await window.electronAPI.ipcRenderer.invoke('dialog', {
+        name: 'showMessageBox',
+        options: {
+          title: '删除完成',
+          message: `已删除 ${deleteResult} 条 OCR 记录`,
+          buttons: ['关闭'],
+          type: 'info',
+          noLink: true
+        }
+      });
+      // 重新加载 OCR 记录
+      this.getOcrData();
     },
     // 获取翻译总览数据
     getTranslationData() {
@@ -125,118 +181,6 @@ export default {
         }
       });
     },
-    // 清空百度 OCR 记录
-    deleteAllBaiduOcrHistory() {
-      // 检测是否有数据
-      let notData = true;
-      this.baidu.forEach(item => {
-        if (item.count > 0) notData = false;
-      });
-      if (notData) return false;
-
-      // 删除确认
-      window.electronAPI.ipcRenderer.invoke('dialog', {
-        name: 'showMessageBox',
-        options: {
-          title: '删除确认',
-          message: '您确定要删除所有百度 OCR 历史记录吗，删除后无法恢复？',
-          buttons: ['取消', '确定删除'],
-          type: 'warning',
-          noLink: true
-        }
-      }).then(result => {
-        if (result.response === 1) {
-          window.electronAPI.ipcRenderer.invoke('deleteAllBaiduOcrHistory').then(count => {
-            window.electronAPI.ipcRenderer.invoke('dialog', {
-              name: 'showMessageBox',
-              options: {
-                title: '删除完成',
-                message: `已删除 ${count} 条百度 OCR 记录`,
-                buttons: ['关闭'],
-                type: 'info',
-                noLink: true
-              }
-            });
-            // 重新加载 OCR 记录
-            this.getOcrData();
-          });
-        }
-      });
-    },
-    // 清空讯飞 OCR 记录
-    async deleteXunfeiOcrHistory() {
-      // 检测是否有数据
-      let notData = true;
-      this.xunfei.forEach(item => {
-        if (item.count > 0) notData = false;
-      });
-      if (notData) return false;
-
-      // 删除确认
-      const result = await  window.electronAPI.ipcRenderer.invoke('dialog', {
-        name: 'showMessageBox',
-        options: {
-          title: '删除确认',
-          message: '您确定要删除所有讯飞 OCR 历史记录吗，删除后无法恢复？',
-          buttons: ['取消', '确定删除'],
-          type: 'warning',
-          noLink: true
-        }
-      })
-      if (result.response !== 1) return false;
-      // 删除
-      const deleteCount = await window.electronAPI.ipcRenderer.invoke('deleteXunfeiOcrHistory');
-      await window.electronAPI.ipcRenderer.invoke('dialog', {
-        name: 'showMessageBox',
-        options: {
-          title: '删除完成',
-          message: `已删除 ${deleteCount} 条讯飞 OCR 记录`,
-          buttons: ['关闭'],
-          type: 'info',
-          noLink: true
-        }
-      });
-      // 重新加载 OCR 记录
-      this.getOcrData();
-    },
-    // 清空腾讯 OCR 记录
-    deleteTencentOcrHistory() {
-      // 检测是否有数据
-      let notData = true;
-      this.tencent.forEach(item => {
-        if (item.count > 0) notData = false;
-      });
-      if (notData) return false;
-
-      // 删除确认
-      window.electronAPI.ipcRenderer.invoke('dialog', {
-        name: 'showMessageBox',
-        options: {
-          title: '删除确认',
-          message: '您确定要删除所有腾讯 OCR 历史记录吗，删除后无法恢复？',
-          buttons: ['取消', '确定删除'],
-          type: 'warning',
-          noLink: true
-        }
-      }).then(result => {
-        if (result.response === 1) {
-          window.electronAPI.ipcRenderer.invoke('deleteTencentOcrHistory').then(count => {
-            window.electronAPI.ipcRenderer.invoke('dialog', {
-              name: 'showMessageBox',
-              options: {
-                title: '删除完成',
-                message: `已删除 ${count} 条腾讯 OCR 记录`,
-                buttons: ['关闭'],
-                type: 'info',
-                noLink: true
-              }
-            });
-            // 重新加载 OCR 记录
-            this.getOcrData();
-          });
-        }
-      });
-    }
   },
   created() {
     this.getOcrData();

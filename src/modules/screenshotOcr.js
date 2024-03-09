@@ -6,8 +6,8 @@ const Ocr = require('./Ocr');
 
 module.exports = class ScreenshotOcr {
   options = null;  // 选项
-  available = {baidu: false, tencent: false, xunfei: false};  // 功能可用性
-  providerList = {baidu: '百度', tencent: '腾讯', xunfei: '讯飞'};  // OCR 提供商名称
+  available = {baidu: false, tencent: false, xunfei: false, youdao: false};  // 功能可用性
+  providerList = {baidu: '百度', tencent: '腾讯', xunfei: '讯飞', youdao: '有道'};  // OCR 提供商名称
 
   constructor(options) {
     this.options = options;
@@ -34,6 +34,10 @@ module.exports = class ScreenshotOcr {
       this.options.xunfeiOcrAPIKey !== ''
     ) {
       this.available.xunfei = true;
+    }
+    // 检查有道 OCR API 是否可用
+    if (this.options.youdaoOcrAppID !== '' && this.options.youdaoOcrAppKey !== '') {
+      this.available.youdao = true;
     }
   }
 
