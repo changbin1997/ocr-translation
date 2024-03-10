@@ -7,7 +7,7 @@
           <i class="icon-cross me-1"></i>
           <span>清空</span>
         </button>
-        <button type="button" title="朗读原文" class="btn" :disabled="originalText.length < 1 || disabledVoiceBtn" @click="startVoice(originalText)">
+        <button type="button" title="朗读原文" class="btn" :disabled="originalText.length < 1 || disabledVoiceBtn" @click="startVoice(originalText, 'original')">
           <i class="icon-volume-medium me-1"></i>
           <span>朗读</span>
         </button>
@@ -30,7 +30,7 @@
       </div>
       <!--译文操作区域-->
       <div class="btn-group btn-box">
-        <button type="button" title="朗读译文" class="btn" :disabled="resultText.length < 1 || disabledVoiceBtn" @click="startVoice(resultText)">
+        <button type="button" title="朗读译文" class="btn" :disabled="resultText.length < 1 || disabledVoiceBtn" @click="startVoice(resultText, 'result')">
           <i class="icon-volume-medium me-1"></i>
           <span>朗读</span>
         </button>
@@ -99,7 +99,7 @@ export default {
         return false;
       }
 
-      window.electronAPI.ipcRenderer.invoke('dialog', {
+      await window.electronAPI.ipcRenderer.invoke('dialog', {
         name: 'showMessageBox',
         options: {
           title: '完成',
@@ -318,8 +318,52 @@ export default {
       this.favoriteId = null;
     },
     // 开始语音朗读
-    startVoice(text) {
+    startVoice(text, type) {
       if (text === '') return false;
+      let language = '';
+      if (type === 'result') {
+        // 获取译文语言名称
+        if (this.translationResult === null) return false;
+        language = this.languageList1.find(item => {
+          return item.code === this.translationResult.to;
+        });
+      }else {
+        // 获取原文语言名称
+        if (this.languageSelected1 !== 'auto') {
+          language = this.languageList1.find(item => item.code === this.languageSelected1);
+        }else if (this.translationResult !== null) {
+          language = this.languageList1.find(item => {
+            return item.code === this.translationResult.from;
+          });
+        }else {
+          window.electronAPI.ipcRenderer.invoke('dialog', {
+            name: 'showMessageBox',
+            options: {
+              title: '原文语言未知',
+              message: `请先选择原文语言或等待翻译完成后再收听原文朗读！`,
+              buttons: ['关闭'],
+              type: 'error',
+              noLink: true
+            }
+          });
+          return false;
+        }
+      }
+      // 寻找指定语言的语音库
+      if (!this.voice.changeLanguage(language.code)) {
+        window.electronAPI.ipcRenderer.invoke('dialog', {
+          name: 'showMessageBox',
+          options: {
+            title: '没有适合的语音库',
+            message: `您的电脑上缺少 ${language.name} 的语音库！`,
+            buttons: ['关闭'],
+            type: 'error',
+            noLink: true
+          }
+        });
+        return false;
+      }
+      // 开始朗读
       this.voice.start({
         text: text,
         start: () => {
