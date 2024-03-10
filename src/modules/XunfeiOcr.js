@@ -69,7 +69,12 @@ module.exports = class XunfeiOcr {
         text.pages[0].lines.forEach(val => {
           textList.push(val.words[0].content);
         });
-        resolve(textList);
+        // 如果没有识别到内容就不返回
+        if (textList.length < 1) {
+          resolve({code: 0, msg: '没有识别到任何文字！'});
+        }else {
+          resolve(textList);
+        }
       }).catch(error => {
         resolve({
           msg: error.response.data.message !== undefined ? error.response.data.message : error.message,

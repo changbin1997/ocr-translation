@@ -1,18 +1,25 @@
 OCR 翻译（ocr-translation）是一个使用 Electron 开发的 OCR 文字识别 + 翻译的软件，也是我为了解决个人需求开发的软件。
 
-软件本身并不完全具备 OCR 识别和翻译的功能，OCR 功能需要调用百度或腾讯提供的在线 OCR 识别服务，翻译也需要调用百度翻译。
+软件本身并不完全具备 OCR 识别和翻译的功能，OCR 功能需要调用在线的 OCR 识别服务，翻译也需要调用百度翻译。
 
-软件没有内置 API 密钥信息，使用 OCR 功能需要填写百度或腾讯的 API 密钥信息，使用翻译功能需要填写百度翻译的 API 密钥信息。
+软件没有内置 API 密钥信息，使用 OCR 功能需要填写相关的 API 密钥信息，使用翻译功能需要填写百度翻译的 API 密钥信息。
 
 下面是 API 申请地址：
 
 * 百度 OCR API：[https://ai.baidu.com/tech/ocr_general](https://ai.baidu.com/tech/ocr_general)
 * 腾讯 OCR API：[https://cloud.tencent.com/product/ocr-catalog](https://cloud.tencent.com/product/ocr-catalog)
+* 科大讯飞 OCR API [https://www.xfyun.cn/services/common-ocr](https://www.xfyun.cn/services/common-ocr)
+* 有道智云 OCR API [https://ai.youdao.com/product-ocr-print.s](https://ai.youdao.com/product-ocr-print.s)
 * 百度翻译 API：[https://fanyi-api.baidu.com/](https://fanyi-api.baidu.com/)
 
-百度和腾讯的 API 每月可以免费调用 1000 次，百度翻译 API 标准版每月可以免费翻译 50000 字。
+下面是 API 的免费额度说明：
 
-上面的免费调用次数说明写于 2022 年 7 月 29 日，免费额度和收费情况可能随时会更改，一切以官网为准。
+* 百度通用文字识别：每月 1000 次免费
+* 腾讯通用文字识别：每月 1000 次免费
+* 讯飞通用文字识别：注册后免费 10 万次
+* 百度翻译 API：标准版每月 50000 字免费
+
+以上信息写于 2022 年 8 月 28 日，API 额度可能随时会更改，一切以官网为准。
 
 ## 支持的功能
 
@@ -24,9 +31,9 @@ OCR 翻译（ocr-translation）是一个使用 Electron 开发的 OCR 文字识�
 * 腾讯通用文字识别 - 通用印刷体识别（高精度版）
 * 腾讯通用文字识别 - 广告文字识别
 * 腾讯通用文字识别 - 手写体识别
+* 科大讯飞 - 通用文字识别
+* 有道智云 - 通用文字识别
 * 百度翻译
-
-目前只支持百度和腾讯的 OCR 服务，如果后续发现有提供免费额度的 OCR 服务，我也会加进去。
 
 ## 使用说明
 
@@ -84,4 +91,4 @@ OCR 翻译（ocr-translation）是一个使用 Electron 开发的 OCR 文字识�
 
 软件虽然是用 Electron 开发的，但在 Linux 和 Mac 并不能使用完整功能，软件的选择屏幕区域识别功能用到了微信截图的 dll，在 Linux 和 Mac 可能无法使用。
 
-软件没有服务器，不会联网，只有 OCR 识别和翻译的时候会连接到百度或腾讯的服务器。软件的数据保存使用的是 SQLite 数据库，第一次进入软件后会在软件目录生成一个 `data.db` 的数据文件，软件设置和历史记录就保存在 `data.db` 中。
+软件没有服务器，不会联网，只有 OCR 识别和翻译的时候会连接到 API 服务器。软件的数据保存使用的是 SQLite 数据库，第一次进入软件后会在软件目录生成一个 `data.db` 的数据文件，软件设置和历史记录就保存在 `data.db` 中。

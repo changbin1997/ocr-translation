@@ -11,6 +11,7 @@
         <li>腾讯通用文字识别 - 广告文字识别</li>
         <li>腾讯通用文字识别 - 手写体识别</li>
         <li>科大讯飞 - 通用文字识别</li>
+        <li>有道智云 - 通用文字识别</li>
         <li>百度翻译</li>
       </ul>
       <p>上面是目前支持调用的 API 服务，如果后续找到还可以的提供免费额度的 API 服务，我也会加进去。</p>
@@ -23,6 +24,7 @@
       <p>百度 OCR：<a href="https://ai.baidu.com/tech/ocr" @click="openLink">https://ai.baidu.com/tech/ocr</a></p>
       <p>腾讯 OCR：<a href="https://cloud.tencent.com/product/ocr-catalog" @click="openLink">https://cloud.tencent.com/product/ocr-catalog</a></p>
       <p>科大讯飞 OCR：<a href="https://www.xfyun.cn/services/common-ocr" @click="openLink">https://www.xfyun.cn/services/common-ocr</a></p>
+      <p>科有道智云 OCR：<a href="https://ai.youdao.com/product-ocr-print.s" @click="openLink">https://ai.youdao.com/product-ocr-print.s</a></p>
       <p>百度翻译：<a href="https://fanyi-api.baidu.com/" @click="openLink">https://fanyi-api.baidu.com/</a></p>
       <p>下面是 API 的免费额度说明：</p>
       <ul>

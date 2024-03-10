@@ -32,7 +32,7 @@ module.exports = class Ocr {
     }
     // 调整返回的内容
     return new Promise((resolve) => {
-      result.then(data => {
+      result.then(async data => {
         // 是否出错
         if (data.error_msg !== undefined && data.error_code !== undefined) {
           resolve({code: data.error_code, msg: data.error_msg});
@@ -40,14 +40,18 @@ module.exports = class Ocr {
         }
 
         // 添加 OCR 历史记录
-        this.data.addOcrHistory('baidu', type).then(() => {
-          // 只返回识别内容数组
-          const resultList = [];
-          data.words_result.forEach(item => {
-            resultList.push(item.words);
-          });
-          resolve(resultList);
+        await this.data.addOcrHistory('baidu', type);
+        // 只返回识别内容数组
+        const resultList = [];
+        data.words_result.forEach(item => {
+          resultList.push(item.words);
         });
+        // 如果没有识别到文字就不返回识别内容
+        if (resultList.length < 1) {
+          resolve({code: 0, msg: '没有识别到任何文字！'});
+        }else {
+          resolve(resultList);
+        }
       }).catch(error => {
         // 是否请求到百度服务器
         if (error.error_msg !== undefined && error.error_code !== undefined) {
