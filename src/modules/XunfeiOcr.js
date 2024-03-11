@@ -61,20 +61,25 @@ module.exports = class XunfeiOcr {
         }
 
         // 获取识别结果
-        let text = Buffer.from(result.data.payload.result.text, 'base64').toString('utf-8');
-        // 把识别结果转换为对象
-        text = JSON.parse(text);
+        let text = null;
+        try {
+          text = Buffer.from(result.data.payload.result.text, 'base64').toString('utf-8');
+          text = JSON.parse(text);
+        } catch (error) {
+          resolve({code: 0, msg: error.message});
+          return false;
+        }
+        // 是否按照预期返回识别结果
+        if (text.pages[0].lines === undefined || text.pages[0].lines[0].words[0].content === undefined) {
+          resolve({code: 0, msg: '讯飞服务器未能返回识别文字！'});
+          return false;
+        }
         const textList = [];
         // 获取每一行的文字
         text.pages[0].lines.forEach(val => {
           textList.push(val.words[0].content);
         });
-        // 如果没有识别到内容就不返回
-        if (textList.length < 1) {
-          resolve({code: 0, msg: '没有识别到任何文字！'});
-        }else {
-          resolve(textList);
-        }
+        resolve(textList);
       }).catch(error => {
         resolve({
           msg: error.response.data.message !== undefined ? error.response.data.message : error.message,

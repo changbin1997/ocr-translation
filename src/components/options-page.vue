@@ -99,6 +99,19 @@
         </div>
       </div>
       <div class="mb-4"></div>
+      <!--翻译语音朗读设置-->
+      <p class="mb-2"><b>翻译语音朗读设置</b></p>
+      <div aria-label="翻译语音朗读" role="group">
+        <div class="mb-3">
+          <label for="translation-volume" class="form-label">语音音量</label>
+          <input type="range" class="form-range" id="translation-volume" max="10" min="1" v-model="optionsSelected.translationVoiceVolume">
+        </div>
+        <div class="mb-3">
+          <label for="translation-speed" class="form-label">语音语速</label>
+          <input type="range" class="form-range" id="translation-speed" max="10" min="1" v-model="optionsSelected.translationVoiceSpeed">
+        </div>
+      </div>
+      <div class="mb-4"></div>
       <!--快捷键-->
       <p class="mb-2"><b>全局快捷键</b></p>
       <div aria-label="快捷键" role="group">
@@ -161,6 +174,8 @@
         <li>中文发音人可以朗读中文和英文</li>
         <li>英文发音人只能朗读英文</li>
         <li>OCR 识别完成后自动朗读和自动翻译不能同时开启，开启自动翻译后 OCR 自动朗读会被取消</li>
+        <li>翻译朗读的发音人会根据翻译的语言自动选择对应语言的发音人</li>
+        <li>Windows10 及以上的系统可以在 设置 - 时间和语言 - 语音 - 已安装的语音包添加语音库</li>
       </ol>
     </div>
   </div>
@@ -190,6 +205,8 @@ export default {
         ocrVoiceSpeed: 2,
         ocrVoiceVolume: 10,
         ocrVoiceLibrarySelected: '',
+        translationVoiceSpeed: 2,
+        translationVoiceVolume: 10,
         keyF1Enable: false,
         keyF1Function: '百度通用OCR识别',
         keyF1Provider: 'baidu',

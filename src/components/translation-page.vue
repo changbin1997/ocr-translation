@@ -304,7 +304,7 @@ export default {
         this.translationResult = result;
         // 如果开启了翻译完成后自动朗读就朗读译文
         if (this.$store.state.options.translationAutoVoice) {
-          this.startVoice(this.resultText);
+          this.startVoice(this.resultText, 'result');
         }
       })
     },
@@ -434,7 +434,10 @@ export default {
   created() {
     document.title = '翻译';
     // 初始化语音朗读
-    this.voice = new Voice();
+    this.voice = new Voice({
+      volume: this.$store.state.options.translationVoiceVolume / 10,
+      speed: this.$store.state.options.translationVoiceSpeed
+    });
     // 检查 API 密钥
     this.apiInit();
     // 检查自动翻译

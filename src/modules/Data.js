@@ -155,6 +155,8 @@ module.exports = class Data {
         // 把 Number 类型的值转为 Number
         options.ocrVoiceSpeed = Number(options.ocrVoiceSpeed);
         options.ocrVoiceVolume = Number(options.ocrVoiceVolume);
+        options.translationVoiceVolume = Number(options.translationVoiceVolume);
+        options.translationVoiceSpeed = Number(options.translationVoiceSpeed);
         resolve(options);
       });
     });
@@ -284,6 +286,8 @@ module.exports = class Data {
       ocrVoiceSpeed: 2,
       ocrVoiceVolume: 10,
       ocrVoiceLibrarySelected: '',
+      translationVoiceVolume: 10,
+      translationVoiceSpeed: 2,
       keyF1Enable: false,
       keyF1Function: '百度通用OCR识别',
       keyF1Provider: 'baidu',
@@ -394,7 +398,7 @@ module.exports = class Data {
     created INTEGER NOT NULL DEFAULT 0
     )
     `;
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       this.db.run(sql, async err => {
         if (err) {
           resolve(err);

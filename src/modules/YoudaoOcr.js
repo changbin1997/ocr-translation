@@ -31,16 +31,17 @@ module.exports = class YoudaoOcr {
           return false;
         }
 
+        // 是否按照格式返回结果
+        if (result.data.Result === undefined || result.data.Result.regions[0].lines[0].text === undefined) {
+          resolve({code: 0, msg: '有道服务器未能返回识别文字！'});
+          return false;
+        }
+
         const textList = [];  // 存放识别结果
         result.data.Result.regions.forEach(val => {
           textList.push(val.lines[0].text);
         });
-
-        if (textList.length < 1) {
-          resolve({code: 0, msg: '没有识别到文字！'});
-        }else {
-          resolve(textList);
-        }
+        resolve(textList);
       }).catch(error => {
         resolve({code: error.response.status, msg: error.message});
       });
