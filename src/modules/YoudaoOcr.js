@@ -27,13 +27,13 @@ module.exports = class YoudaoOcr {
       }).then(result => {
         // 是否出错
         if (result.data.errorCode !== '0' && result.data.msg !== undefined) {
-          resolve({code: result.data.errorCode, msg: result.data.msg});
+          resolve({result: 'error', msg: `${result.data.errorCode} ${result.data.msg}`});
           return false;
         }
 
         // 是否按照格式返回结果
         if (result.data.Result === undefined || result.data.Result.regions[0].lines[0].text === undefined) {
-          resolve({code: 0, msg: '有道服务器未能返回识别文字！'});
+          resolve({result: 'error', msg: '有道服务器未能返回识别文字！'});
           return false;
         }
 
@@ -41,9 +41,13 @@ module.exports = class YoudaoOcr {
         result.data.Result.regions.forEach(val => {
           textList.push(val.lines[0].text);
         });
-        resolve(textList);
+        resolve({result: 'success', list: textList});
       }).catch(error => {
-        resolve({code: error.response.status, msg: error.message});
+        if (error.response) {
+          resolve({result: 'error', msg: `${error.response.status} ${error.message}`});
+        }else {
+          resolve({result: 'error', msg: `${error.code} ${error.message}`});
+        }
       });
     });
   }

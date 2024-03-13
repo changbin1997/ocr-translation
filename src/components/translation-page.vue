@@ -83,14 +83,14 @@ export default {
     // 删除收藏
     async deleteFavorite() {
       if (this.favoriteId === null) return false;
-      const changes = await window.electronAPI.ipcRenderer.invoke('deleteFavorite', this.favoriteId);
+      const deleteResult = await window.electronAPI.ipcRenderer.invoke('deleteFavorite', this.favoriteId);
       // 删除出错
-      if (changes.message !== undefined || changes !== 1) {
+      if (deleteResult.result !== 'success') {
         window.electronAPI.ipcRenderer.invoke('dialog', {
           name: 'showMessageBox',
           options: {
-            title: '出错了',
-            message: changes.message !== undefined ? changes.message : '删除数据时发生未知错误！',
+            title: '删除数据出错',
+            message: deleteResult.msg,
             buttons: ['关闭'],
             type: 'error',
             noLink: true
@@ -123,7 +123,7 @@ export default {
         // 发送 IPC 请求
         const result = await window.electronAPI.ipcRenderer.invoke('addToFavorites', this.translationResult);
         // 是否添加成功
-        if (result.count === 1) {
+        if (result.result === 'success') {
           window.electronAPI.ipcRenderer.invoke('dialog', {
             name: 'showMessageBox',
             options: {
@@ -140,8 +140,8 @@ export default {
           window.electronAPI.ipcRenderer.invoke('dialog', {
             name: 'showMessageBox',
             options: {
-              title: '出错了',
-              message: '添加收藏时发生错误！',
+              title: '添加数据出错',
+              message: result.msg,
               buttons: ['关闭'],
               type: 'error',
               noLink: true
@@ -222,7 +222,7 @@ export default {
       ev.stopPropagation();
     },
     // 提交翻译
-    submit() {
+    async submit() {
       // 重置翻译结果和翻译收藏
       this.translationResult = null;
       this.favorite = false;
@@ -279,34 +279,33 @@ export default {
       // 禁用翻译按钮
       this.disabledSubmitBtn = true;
       // 提交翻译请求
-      window.electronAPI.ipcRenderer.invoke('translation', submitData).then(result => {
-        this.disabledSubmitBtn = false;
-        // 是否翻译出错
-        if (result.code !== undefined && result.msg !== undefined) {
-          window.electronAPI.ipcRenderer.invoke('dialog', {
-            name: 'showMessageBox',
-            options: {
-              title: '错误：' + result.code,
-              message: result.msg,
-              buttons: ['关闭'],
-              type: 'error',
-              noLink: true
-            }
-          });
-          return false;
-        }
-        // 显示译文
-        const resultList = [];
-        result.trans_result.forEach(val => {
-          resultList.push(val.dst);
+      const result = await window.electronAPI.ipcRenderer.invoke('translation', submitData);
+      this.disabledSubmitBtn = false;
+      // 是否翻译出错
+      if (result.result !== 'success') {
+        window.electronAPI.ipcRenderer.invoke('dialog', {
+          name: 'showMessageBox',
+          options: {
+            title: '翻译出错',
+            message: result.msg,
+            buttons: ['关闭'],
+            type: 'error',
+            noLink: true
+          }
         });
-        this.resultText = resultList.join("\n");
-        this.translationResult = result;
-        // 如果开启了翻译完成后自动朗读就朗读译文
-        if (this.$store.state.options.translationAutoVoice) {
-          this.startVoice(this.resultText, 'result');
-        }
-      })
+        return false;
+      }
+      // 显示译文
+      const resultList = [];
+      result.data.trans_result.forEach(val => {
+        resultList.push(val.dst);
+      });
+      this.resultText = resultList.join("\n");
+      this.translationResult = result.data;
+      // 如果开启了翻译完成后自动朗读就朗读译文
+      if (this.$store.state.options.translationAutoVoice) {
+        this.startVoice(this.resultText, 'result');
+      }
     },
     // 清空
     clear() {

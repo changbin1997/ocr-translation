@@ -86,14 +86,14 @@ export default {
         }
       });
       if (result.response !== 1) return false;
-      const changes = await window.electronAPI.ipcRenderer.invoke('deleteFavorite', this.list[index].id);
+      const deleteResult = await window.electronAPI.ipcRenderer.invoke('deleteFavorite', this.list[index].id);
       // 删除出错
-      if (changes.message !== undefined || changes !== 1) {
+      if (deleteResult.result !== 'success') {
         window.electronAPI.ipcRenderer.invoke('dialog', {
           name: 'showMessageBox',
           options: {
-            title: '出错了',
-            message: changes.message !== undefined ? changes.message : '删除数据时发生未知错误！',
+            title: '删除数据错误',
+            message: deleteResult.msg,
             buttons: ['关闭'],
             type: 'error',
             noLink: true
@@ -173,12 +173,12 @@ export default {
       // 发送 IPC 请求
       const result = await window.electronAPI.ipcRenderer.invoke('getFavorites', this.page * 10 - 10);
       // 查询出错
-      if (result.message !== undefined) {
+      if (result.result !== 'success') {
         window.electronAPI.ipcRenderer.invoke('dialog', {
           name: 'showMessageBox',
           options: {
-            title: '出错了',
-            message: result.message,
+            title: '查询数据出错',
+            message: result.msg,
             buttons: ['关闭'],
             type: 'error',
             noLink: true

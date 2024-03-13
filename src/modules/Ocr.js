@@ -35,7 +35,7 @@ module.exports = class Ocr {
       result.then(async data => {
         // 是否出错
         if (data.error_msg !== undefined && data.error_code !== undefined) {
-          resolve({code: data.error_code, msg: data.error_msg});
+          resolve({result: 'error', msg: `${data.error_code} ${data.error_msg}`});
           return false;
         }
 
@@ -48,22 +48,16 @@ module.exports = class Ocr {
         });
         // 如果没有识别到文字就不返回识别内容
         if (resultList.length < 1) {
-          resolve({code: 0, msg: '没有识别到任何文字！'});
+          resolve({result: 'error', msg: '没有识别到任何文字！'});
         }else {
-          resolve(resultList);
+          resolve({result: 'success', list: resultList});
         }
       }).catch(error => {
         // 是否请求到百度服务器
         if (error.error_msg !== undefined && error.error_code !== undefined) {
-          resolve({
-            msg: error.error_msg,
-            code: error.error_code
-          });
+          resolve({result: 'error', msg: `${error.error_code} ${error.error_msg}`});
         }else {
-          resolve({
-            msg: '无法访问百度 OCR 服务器！',
-            code: 0
-          });
+          resolve({result: 'error', msg: '无法访问百度 API 服务器！'});
         }
       })
     });
@@ -102,21 +96,17 @@ module.exports = class Ocr {
     }
     // 处理识别结果并返回
     return new Promise((resolve) => {
-      result.then(data => {
+      result.then(async data => {
         // 添加 OCR 历史记录
-        this.data.addOcrHistory('tencent', type).then(() => {
-          // 把识别结果封装为数组返回
-          const resultList = [];
-          data.TextDetections.forEach(item => {
-            resultList.push(item.DetectedText);
-          });
-          resolve(resultList);
+        await this.data.addOcrHistory('tencent', type);
+        // 把识别结果封装为数组返回
+        const resultList = [];
+        data.TextDetections.forEach(item => {
+          resultList.push(item.DetectedText);
         });
+        resolve({ result: 'success', list: resultList });
       }).catch(error => {
-        resolve({
-          code: error.code,
-          msg: error.message
-        });
+        resolve({result: 'error', msg: `${error.code} ${error.message}`});
       })
     });
   }

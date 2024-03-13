@@ -46,42 +46,29 @@ module.exports = class BaiduTranslation {
         url: 'https://api.fanyi.baidu.com/api/trans/vip/translate',
         method: 'post',
         data: querystring.stringify(submitData),
-        timeout: 10000,
+        timeout: 15000,
         headers: {'Content-Type': 'application/x-www-form-urlencoded'}
-      }).then(result => {
+      }).then(async result => {
         // 百度返回的不是 JSON 格式
         if (typeof result.data === "string") {
-          resolve({
-            code: 'Baidu server error',
-            msg: '百度服务器返回的数据不是标准 JSON 格式！'
-          });
+          resolve({result: 'error', msg: '百度翻译服务器未能返回翻译数据！'});
           return false;
         }
 
         // API出错
         if (result.data.error_code !== undefined && result.data.error_msg !== undefined) {
-          resolve({
-            code: result.data.error_code,
-            msg: result.data.error_msg
-          });
+          resolve({ result: 'error', msg: `${result.data.error_code} ${result.data.error_msg}` });
           return  false;
         }
 
         // 添加到翻译历史记录
-        this.data.addTranslationHistory('baidu', q.length).then(() => {
-          resolve(result.data);
-        });
+        await this.data.addTranslationHistory('baidu', q.length);
+        resolve({ result: 'success', data: result.data });
       }).catch(error => {
         if (error.response) {
-          resolve({
-            code: error.response.status,
-            msg: error.response.statusText
-          });
+          resolve({ result: 'error', msg: `${error.response.status} ${error.message}` });
         }else {
-          resolve({
-            code: 0,
-            msg: '翻译请求无法发送到百度服务器！'
-          });
+          resolve({result: 'error', msg: `${error.code} ${error.message}`});
         }
       });
     });

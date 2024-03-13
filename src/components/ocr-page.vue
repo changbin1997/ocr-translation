@@ -168,11 +168,11 @@ export default {
       // 提交
       const result = await window.electronAPI.ipcRenderer.invoke('ocr', submitData);
       // 出错
-      if (result.code !== undefined && result.msg !== undefined) {
+      if (result.result !== 'success') {
         await window.electronAPI.ipcRenderer.invoke('dialog', {
           name: 'showMessageBox',
           options: {
-            title: '错误' + result.code,
+            title: 'OCR识别错误',
             message: result.msg,
             buttons: ['关闭'],
             type: 'error',
@@ -184,7 +184,7 @@ export default {
         return false;
       }
       // 把识别结果数组用换行符分隔转换为字符串
-      this.ocrText = result.join("\n");
+      this.ocrText = result.list.join("\n");
       // 如果开启了自动朗读就朗读 OCR 文字
       if (this.$store.state.options.ocrAutoVoice) {
         this.startVoice();
@@ -326,7 +326,7 @@ export default {
       this.imgOptions.url = 'data:image/png;base64,' + this.$store.state.ocrResult.img;
       this.imgOptions.show = true;
       // 显示文字
-      this.ocrText = this.$store.state.ocrResult.text.join("\n");
+      this.ocrText = this.$store.state.ocrResult.list.join("\n");
       // 清空 Vuex 中存储的 OCR 结果
       this.$store.commit('changeOcrResult', null);
       // 如果开启了自动朗读就朗读 OCR 文字

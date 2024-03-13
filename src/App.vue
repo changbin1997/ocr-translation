@@ -17,11 +17,22 @@ export default {
   },
   methods: {
     // 获取选项
-    getOptions() {
-      window.electronAPI.ipcRenderer.invoke('getOptions').then(options => {
-        if (options === null) return false;
-        this.$store.commit('changeOptions', options);
-      })
+    async getOptions() {
+      const options = await window.electronAPI.ipcRenderer.invoke('getOptions');
+      if (options.result !== 'success') {
+        window.electronAPI.ipcRenderer.invoke('dialog', {
+          name: 'showMessageBox',
+          options: {
+            title: '查询数据出错',
+            message: options.msg,
+            buttons: ['关闭'],
+            type: 'error',
+            noLink: true
+          }
+        });
+        return false;
+      }
+      this.$store.commit('changeOptions', options.options);
     }
   },
   created() {
@@ -30,7 +41,7 @@ export default {
   mounted() {
     // 接收快捷键调用的 OCR 结果
     window.electronAPI.onResponse('ocrResult', (ev, args) => {
-      if (args.img !== undefined && args.text !== undefined) {
+      if (args.result === 'success' && args.img !== undefined && args.list !== undefined) {
         this.$store.commit('changeOcrResult', args);
         this.$router.push({
           name: 'ocrPage',

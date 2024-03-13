@@ -279,7 +279,7 @@ export default {
       }, 30);
     },
     // 保存设置
-    saveOptions() {
+    async saveOptions() {
       // 要保存的数据
       const submitData = this.optionsSelected;
       // 设置全局快捷键调用的提供商
@@ -296,20 +296,33 @@ export default {
       // 禁用保存按钮
       this.disabledSaveBtn = true;
       // 发送保存请求
-      window.electronAPI.ipcRenderer.invoke('updateOptions', submitData).then(count => {
-        // 恢复保存按钮
-        this.disabledSaveBtn = false;
+      const result = await window.electronAPI.ipcRenderer.invoke('updateOptions', submitData);
+      // 恢复保存按钮
+      this.disabledSaveBtn = false;
+      // 保存出错
+      if (result.result !== 'success') {
         window.electronAPI.ipcRenderer.invoke('dialog', {
           name: 'showMessageBox',
           options: {
-            title: '已成功保存',
-            message: `您更改的 ${count} 个选项已成功保存，如果更改了全局快捷键设置，需要重启软件才会生效。`,
+            title: '更新数据出错',
+            message: result.msg,
             buttons: ['关闭'],
-            type: 'info',
+            type: 'error',
             noLink: true
           }
         });
-      })
+        return false;
+      }
+      window.electronAPI.ipcRenderer.invoke('dialog', {
+        name: 'showMessageBox',
+        options: {
+          title: '已成功保存',
+          message: `您更改的 ${result.count} 个选项已成功保存，如果更改了全局快捷键设置，需要重启软件才会生效。`,
+          buttons: ['关闭'],
+          type: 'info',
+          noLink: true
+        }
+      });
     }
   },
   created() {

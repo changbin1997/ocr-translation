@@ -45,20 +45,21 @@ module.exports = class ScreenshotOcr {
   async ocr(provider, ocrType) {
     // 检查接口是否可用
     if (!this.available[provider]) {
-      return {code: 0, msg: `缺少 ${this.providerList[provider]} API 密钥！`};
+      return {result: 'error', msg: `缺少 ${this.providerList[provider]} API 密钥！`};
     }
     // 调用截图
     const img = await this.screenshot();
     // 取消截图
     if (img === null) return null;
     // 截图出错
-    if (img.code !== undefined && img.msg !== undefined) return img;
+    if (img.result !== undefined && img.result === 'error') return img;
     // 调用 OCR 识别
     const ocr = new Ocr(this.options);
     const result = await ocr[provider](ocrType, img);
     // 识别出错
-    if (result.code !== undefined && result.msg !== undefined) return result;
-    return {img: img, text: result};
+    if (result.result !== 'success') return result;
+    result.img = img;
+    return result;
   }
 
   // 截图
@@ -73,13 +74,13 @@ module.exports = class ScreenshotOcr {
       fs.exists(screenshotModule.exe, exists => {
         // 如果截图 exe 不存在就直接返回
         if (!exists) {
-          resolve({code: 0, msg: `找不到 ${screenshotModule.exe} 文件`});
+          resolve({result: 'error', msg: `找不到 ${screenshotModule.exe} 文件`});
           return false;
         }
         // 检测截图 dll 是否存在
         fs.exists(screenshotModule.dll, dllExists => {
           if (!dllExists) {
-            resolve({code: 0, msg: `找不到 ${screenshotModule.dll} 文件`});
+            resolve({result: 'error', msg: `找不到 ${screenshotModule.dll} 文件`});
             return false;
           }
           // 打开截图程序

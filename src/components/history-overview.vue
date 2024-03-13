@@ -129,11 +129,25 @@ export default {
 
       // 删除
       const deleteResult = await window.electronAPI.ipcRenderer.invoke('deleteOcrHistory', provider);
+      // 删除出错
+      if (deleteResult.result !== 'success') {
+        window.electronAPI.ipcRenderer.invoke('dialog', {
+          name: 'showMessageBox',
+          options: {
+            title: '删除数据出错',
+            message: deleteResult.msg,
+            buttons: ['关闭'],
+            type: 'error',
+            noLink: true
+          }
+        });
+        return false;
+      }
       await window.electronAPI.ipcRenderer.invoke('dialog', {
         name: 'showMessageBox',
         options: {
           title: '删除完成',
-          message: `已删除 ${deleteResult} 条 OCR 记录`,
+          message: `已删除 ${deleteResult.count} 条 OCR 记录`,
           buttons: ['关闭'],
           type: 'info',
           noLink: true
@@ -149,11 +163,11 @@ export default {
       });
     },
     // 清空翻译历史记录
-    deleteAllTranslationHistory() {
+    async deleteAllTranslationHistory() {
       // 如果没有数据
       if (this.baiduTranslation[0].count < 1) return false;
       // 删除确认
-      window.electronAPI.ipcRenderer.invoke('dialog', {
+      const btnResult = await window.electronAPI.ipcRenderer.invoke('dialog', {
         name: 'showMessageBox',
         options: {
           title: '删除确认',
@@ -162,25 +176,38 @@ export default {
           type: 'warning',
           noLink: true
         }
-      }).then(result => {
-        if (result.response === 1) {
-          window.electronAPI.ipcRenderer.invoke('deleteAllTranslationHistory').then(count => {
-            window.electronAPI.ipcRenderer.invoke('dialog', {
-              name: 'showMessageBox',
-              options: {
-                title: '删除完成',
-                message: `已删除 ${count} 条翻译记录`,
-                buttons: ['关闭'],
-                type: 'info',
-                noLink: true
-              }
-            });
-            // 重新加载翻译记录
-            this.getTranslationData();
-          });
+      });
+      if (btnResult.response !== 1) return false;
+      // 删除
+      const deleteResult = await window.electronAPI.ipcRenderer.invoke('deleteAllTranslationHistory');
+      // 删除出错
+      if (deleteResult.result !== 'success') {
+        window.electronAPI.ipcRenderer.invoke('dialog', {
+          name: 'showMessageBox',
+          options: {
+            title: '删除数据出错',
+            message: deleteResult.msg,
+            buttons: ['关闭'],
+            type: 'error',
+            noLink: true
+          }
+        });
+        return false;
+      }
+
+      window.electronAPI.ipcRenderer.invoke('dialog', {
+        name: 'showMessageBox',
+        options: {
+          title: '删除完成',
+          message: `已删除 ${deleteResult.count} 条翻译记录`,
+          buttons: ['关闭'],
+          type: 'info',
+          noLink: true
         }
       });
-    },
+      // 重新加载翻译记录
+      this.getTranslationData();
+    }
   },
   created() {
     this.getOcrData();

@@ -7,7 +7,7 @@ module.exports = class Data {
   dbErr = null;
 
   constructor() {
-    const dbName = path.join(process.cwd(), 'data.db');  // 数据库名
+    const dbName = path.join(process.cwd(), 'data.db'); // 数据库名
     // 打开数据库
     this.db = new sqlite3.Database(dbName, err => {
       if (err !== null) {
@@ -20,47 +20,54 @@ module.exports = class Data {
   deleteFavorite(id) {
     const sql = 'DELETE FROM favorites WHERE id = ?';
     return new Promise(resolve => {
-      this.db.run(sql, [id], function(err) {
+      this.db.run(sql, [id], function (err) {
         if (err) {
-          resolve(err);
+          resolve({ result: 'error', msg: err.message });
           return false;
         }
-        resolve(this.changes);
+        resolve({ result: 'success', count: this.changes });
+      });
+    });
+  }
+
+  // 获取翻译收藏数量
+  favoritesCount() {
+    const sql = 'SELECT COUNT(*) AS count FROM favorites';
+    return new Promise(resolve => {
+      this.db.get(sql, (err, row) => {
+        if (err) {
+          resolve(0);
+        }else {
+          resolve(row.count);
+        }
       });
     });
   }
 
   // 获取翻译收藏
-  getFavorites(page) {
+  async getFavorites(page) {
+    // 获取收藏数量
+    const count = await this.favoritesCount();
+    if (count < 1) return {result: 'success', list: [], count: 0};
+
+    const sql = `
+    SELECT id, language1 AS 'from', language2 AS 'to', src, dst, created FROM favorites
+    ORDER BY created DESC
+    LIMIT ?, ?
+    `;
+
     return new Promise(resolve => {
-      // 获取总数量
-      let count = null;
-      let sql = 'SELECT COUNT(*) AS count FROM favorites';
-      this.db.get(sql, (err, row) => {
+      this.db.all(sql, [page, 10], (err, rows) => {
         if (err) {
-          resolve(err);
+          resolve({ result: 'error', msg: err.message });
           return false;
         }
-        if (row.count < 1) resolve({count: row.count, list: []});
-        count = row.count;
-        // 如果有数据就继续查询
-        sql = `
-        SELECT id, language1 AS 'from', language2 AS 'to', src, dst, created FROM favorites
-        ORDER BY created DESC
-        LIMIT ?, ?
-        `;
-        this.db.all(sql, [page, 10], (err, rows) => {
-          if (err) {
-            resolve(err);
-            return false;
-          }
-          // 时间戳格式化
-          for (let i = 0;i < rows.length;i ++) {
-            rows[i].created = Datetime.timestampFormat(rows[i].created);
-          }
+        // 时间戳格式化
+        for (let i = 0; i < rows.length; i++) {
+          rows[i].created = Datetime.timestampFormat(rows[i].created);
+        }
 
-          resolve({count: count, list: rows});
-        });
+        resolve({ result: 'success', count: count, list: rows });
       });
     });
   }
@@ -69,7 +76,7 @@ module.exports = class Data {
   addToFavorites(result) {
     // 获取当前的时间戳
     const timestamp = Datetime.timestamp();
-    
+
     // 获取原文和译文
     const src = [];
     const dst = [];
@@ -85,63 +92,73 @@ module.exports = class Data {
     (?, ?, ?, ?, ?)
     `;
     // 用于替换 SQL 占位符的数据
-    const value = [result.from, result.to, src.join("\n"), dst.join("\n"), timestamp];
+    const value = [result.from, result.to, src.join('\n'), dst.join('\n'), timestamp];
 
     return new Promise(resolve => {
-      this.db.run(sql, value, function(err) {
+      this.db.run(sql, value, function (err) {
         if (err) {
-          resolve({ count: 0, id: 0 });
+          resolve({ result: 'error', msg: err.message });
           return false;
         }
-        resolve({ count: this.changes, id: this.lastID });
+        resolve({ result: 'success', count: this.changes, id: this.lastID });
       });
     });
   }
 
   // 保存选项
-  updateOptions(options) {
-    return new Promise(resolve => {
-      // 获取选项名
-      const optionsName = Object.keys(options);
-      let value = '';  // 用来存储选项值
-      let count = 0;  // 用来存储更改的行数
+  async updateOptions(options) {
+    // 获取选项名
+    const optionsName = Object.keys(options);
+    let value = ''; // 用来存储选项值
+    let count = 0; // 用来存储更改的行数
 
-      for (let i = 0;i < optionsName.length;i ++) {
-        // 把 Number 类型的值转为 String
-        if (typeof options[optionsName[i]] === "number") {
-          value = String(options[optionsName[i]]);
-        }
-        // 把 Boolean 类型的值转为 String
-        if (typeof options[optionsName[i]] === "boolean") {
-          value = String(Number(options[optionsName[i]]));
-        }
-        // String 类型的值就直接传给 value
-        if (typeof options[optionsName[i]] === "string") {
-          value = options[optionsName[i]];
-        }
-        // 更新数据
-        const sql = 'UPDATE ocr_options SET value = $value WHERE name = $name';
-        const values = {$name: optionsName[i], $value: value};
-        this.db.run(sql, values, function(err) {
-          if (err) resolve(count);
-          count += this.changes;
-          if (count === optionsName.length) resolve(count);
-        });
+    for (let i = 0; i < optionsName.length; i++) {
+      // 把 Number 类型的值转为 String
+      if (typeof options[optionsName[i]] === 'number') {
+        value = String(options[optionsName[i]]);
       }
+      // 把 Boolean 类型的值转为 String
+      if (typeof options[optionsName[i]] === 'boolean') {
+        value = String(Number(options[optionsName[i]]));
+      }
+      // String 类型的值就直接传给 value
+      if (typeof options[optionsName[i]] === 'string') {
+        value = options[optionsName[i]];
+      }
+      // 更新数据
+      const result = await this.updateOptionsData(optionsName[i], value);
+      if (result.result !== 'success') return result;
+      count += result.count;
+    }
+
+    return { result: 'success', count: count };
+  }
+
+  // 保存选项数据
+  updateOptionsData(name, value) {
+    const sql = 'UPDATE ocr_options SET value = ? WHERE name = ?';
+    return new Promise(resolve => {
+      this.db.run(sql, [value, name], function (err) {
+        if (err) {
+          resolve({ result: 'error', msg: err.message });
+        } else {
+          resolve({ result: 'success', count: this.changes });
+        }
+      });
     });
   }
 
   // 获取选项
   getOptions() {
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       this.db.all('SELECT name, value FROM ocr_options', (err, rows) => {
         if (err) {
           this.dbErr = err;
-          resolve(null);
+          resolve({ result: 'error', msg: err.message });
           return false;
         }
-        if (rows.length < 20) resolve(null);
-        const options = {};  // 用来存储转换后的选项
+
+        const options = {}; // 用来存储转换后的选项
         rows.forEach(item => {
           // 把选项名和选项值传给 options
           options[item.name] = item.value;
@@ -157,113 +174,62 @@ module.exports = class Data {
         options.ocrVoiceVolume = Number(options.ocrVoiceVolume);
         options.translationVoiceVolume = Number(options.translationVoiceVolume);
         options.translationVoiceSpeed = Number(options.translationVoiceSpeed);
-        resolve(options);
+        resolve({ result: 'success', options: options });
       });
     });
   }
 
   // 初始化
-  init() {
-    let successCount = 0;  // 记录完成次数
+  async init() {
+    // 检查选项数据表是否存在
+    const optionsTable = await this.optionsTableExists();
+    if (optionsTable.result !== 'success') return optionsTable;
+    // 如果不存在就创建数据表
+    if (optionsTable.count < 1) {
+      const createTable = await this.createOptionsTable();
+      // 创建失败
+      if (createTable.result !== 'success') return createTable;
+      if (createTable.count < 1) return { result: 'error', msg: '无法创建选项数据表！' };
+      // 创建成功就写入默认选项数据
+      const insertData = await this.insertOptions();
+      if (insertData.result !== 'success') return insertData;
+      if (insertData.count < 27) return { result: 'error', msg: '无法写入默认选项数据！' };
+    }
 
-    return new Promise((resolve, reject) => {
-      // 检查选项数据表是否存在
-      this.optionsTableExists().then(result => {
-        // 如果选项数据表不存在就创建数据表
-        if (result < 1) {
-          // 创建数据表
-          this.createOptionsTable().then(count => {
-            if (count < 1) {
-              reject({errno: 'Database Error', code: '无法创建选项数据表！'});
-              return false;
-            }
-            // 写入默认选项
-            this.insertOptions().then(count => {
-              if (count < 23) {
-                reject({errno: 'Database Error', code: '无法创建选项数据表！'});
-                return false;
-              }
-              successCount ++;
-              if (successCount === 4) resolve(successCount);
-            })
-          });
-        }else {
-          successCount ++;
-          if (successCount === 4) resolve(successCount);
-        }
-      }).catch(error => {
-        reject(error);
-      });
+    // 检查 OCR 历史记录数据表是否存在
+    const ocrTable = await this.ocrHistoryTableExists();
+    if (ocrTable.result !== 'success') return ocrTable;
+    // 不存在就创建
+    if (ocrTable.count < 1) {
+      const createTable = await this.createOcrHistoryTable();
+      // 创建失败
+      if (createTable.result !== 'success') return createTable;
+      if (createTable.count < 1) return { result: 'error', msg: '无法创建 OCR 记录数据表！' };
+    }
 
-      // 检查 OCR 历史记录数据表是否存在
-      this.ocrHistoryTableExists().then(result => {
-        // 如果数据表不存在就创建
-        if (result < 1) {
-          this.createOcrHistoryTable().then(count => {
-            // 如果创建失败
-            if (count < 1) {
-              reject({errno: 'Database Error', code: '无法创建 OCR 历史记录数据表！'});
-              return false;
-            }
-            successCount ++;
-            if (successCount === 4) resolve(successCount);
-          });
-        }else {
-          successCount ++;
-          if (successCount === 4) resolve(successCount);
-        }
-      }).catch(error => {
-        reject(error);
-      });
-      // 检查翻译历史记录数据表是否存在
-      this.translationHistoryTableExists().then(result => {
-        if (result < 1) {
-          // 如果不存在就创建数据表
-          this.createTranslationHistoryTable().then(count => {
-            // 如果创建失败
-            if (count < 1) {
-              reject({errno: 'Database Error', code: '无法创建翻译历史记录数据表！'});
-              return false;
-            }
-            successCount ++;
-            if (successCount === 4) resolve(successCount);
-          });
-        }else {
-          successCount ++;
-          if (successCount === 4) resolve(successCount);
-        }
-      }).catch(error => {
-        reject(error);
-      });
+    // 检查翻译历史记录数据表是否存在
+    const translationTable = await this.translationHistoryTableExists();
+    if (translationTable.result !== 'success') return translationTable;
+    // 不存在就创建
+    if (translationTable.count < 1) {
+      const createTable = await this.createTranslationHistoryTable();
+      // 创建失败
+      if (createTable.result !== 'success') return createTable;
+      if (createTable.count < 1) return { result: 'error', msg: '无法创建翻译记录数据表！' };
+    }
 
-      // 检查收藏数据表是否存在
-      this.favoritesTableExists().then(async count => {
-        // 出错就返回
-        if (count.message !== undefined) {
-          reject(count);
-          return false;
-        }
-        if (count < 1) {
-          // 如果不存在就创建数据表
-          const result = await this.createFavoritesTable();
-          if (result.message !== undefined) {
-            reject(result);
-            return false;
-          }
+    // 检查收藏数据表是否存在
+    const favoritesTable = await this.favoritesTableExists();
+    if (favoritesTable.result !== 'success') return favoritesTable;
+    // 不存在就创建
+    if (favoritesTable.count < 1) {
+      const createTable = this.createFavoritesTable();
+      // 创建失败
+      if (createTable.result !== 'success') return createTable;
+      if (createTable.count < 1) return { result: 'error', msg: '无法创建收藏数据表！' };
+    }
 
-          if (result < 1) {
-            reject({ errno: 'Database Error', code: '无法创建收藏数据表！' });
-            return false;
-          }
-
-          successCount ++;
-          if (successCount === 4) resolve(successCount);
-        }else {
-          successCount ++;
-          if (successCount === 4) resolve(successCount);
-        }
-      });
-    });
+    return { result: 'success' };
   }
 
   // 写入默认选项
@@ -276,7 +242,7 @@ module.exports = class Data {
       xunfeiOcrAPISecret: '',
       xunfeiOcrAPIKey: '',
       baiduOcrAppID: '',
-      baiduOcrApiKey : '',
+      baiduOcrApiKey: '',
       baiduOcrSecretKey: '',
       tencentOcrAppID: '',
       tencentOcrSecretID: '',
@@ -301,21 +267,21 @@ module.exports = class Data {
 
     // 获取选项的名称
     const optionsName = Object.keys(options);
-    let values = [];  // 用来存储要写入的 SQL VALUES
-    let sqlPlaceholder = [];  // 用来存储 SQL 占位符
+    let values = []; // 用来存储要写入的 SQL VALUES
+    let sqlPlaceholder = []; // 用来存储 SQL 占位符
 
     optionsName.forEach(item => {
       let value = '';
       // 把 Number 类型的值转为 String
-      if (typeof options[item] === "number") {
+      if (typeof options[item] === 'number') {
         value = String(options[item]);
       }
       // 把 Boolean 类型的值转为 String
-      if (typeof options[item] === "boolean") {
+      if (typeof options[item] === 'boolean') {
         value = String(Number(options[item]));
       }
       // 如果是 String 类型的就直接加入 value
-      if (typeof options[item] === "string") {
+      if (typeof options[item] === 'string') {
         value = options[item];
       }
       // 把选项名和选项值加入 values
@@ -331,13 +297,13 @@ module.exports = class Data {
     VALUES
     ${sqlPlaceholder.join(',')}
     `;
-    return new Promise((resolve, reject) => {
-      this.db.run(sql, values, function(err) {
+    return new Promise(resolve => {
+      this.db.run(sql, values, function (err) {
         if (err) {
-          reject(err);
+          resolve({ result: 'error', msg: err.message });
           return false;
         }
-        resolve(this.changes);
+        resolve({ result: 'success', count: this.changes });
       });
     });
   }
@@ -350,16 +316,15 @@ module.exports = class Data {
     value VARCHAR (300) NOT NULL DEFAULT ""
     )
     `;
-    return new Promise((resolve, reject) => {
-      this.db.run(sql, err => {
+    return new Promise(resolve => {
+      this.db.run(sql, async err => {
         if (err) {
-          reject(err);
+          resolve({ result: 'error', msg: err.message });
           return false;
         }
         // 查询是否创建成功
-        this.optionsTableExists().then(result => {
-          resolve(result);
-        })
+        const result = await this.optionsTableExists();
+        resolve(result);
       });
     });
   }
@@ -375,13 +340,13 @@ module.exports = class Data {
     VALUES
     (?, ?, ?)
     `;
-    return new Promise((resolve) => {
-      this.db.run(sql, [ocrType, provider, time], function(err) {
+    return new Promise(resolve => {
+      this.db.run(sql, [ocrType, provider, time], function (err) {
         if (err) {
-          resolve(err);
+          resolve({ result: 'error', msg: err.message });
           return false;
         }
-        resolve(this.changes);
+        resolve({ result: 'success', count: this.changes });
       });
     });
   }
@@ -398,10 +363,10 @@ module.exports = class Data {
     created INTEGER NOT NULL DEFAULT 0
     )
     `;
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       this.db.run(sql, async err => {
         if (err) {
-          resolve(err);
+          resolve({ result: 'error', msg: err.message });
           return false;
         }
         const result = await this.favoritesTableExists();
@@ -416,13 +381,13 @@ module.exports = class Data {
     SELECT COUNT(*) FROM sqlite_master
     WHERE type="table" AND name="favorites"
     `;
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       this.db.get(sql, (err, row) => {
         if (err) {
-          resolve(err);
+          resolve({ result: 'error', msg: err.message });
           return false;
         }
-        resolve(row['COUNT(*)']);
+        resolve({ result: 'success', count: row['COUNT(*)'] });
       });
     });
   }
@@ -437,58 +402,68 @@ module.exports = class Data {
     ocr_time INTEGER NOT NULL DEFAULT 0
     )
     `;
-    return new Promise((resolve, reject) => {
-      this.db.run(sql, err => {
+    return new Promise(resolve => {
+      this.db.run(sql, async err => {
         if (err) {
-          reject(err);
+          resolve({ result: 'error', msg: err.message });
           return false;
         }
-        this.ocrHistoryTableExists().then(result => {
-          resolve(result);
-        });
+        const result = await this.ocrHistoryTableExists();
+        resolve(result);
+      });
+    });
+  }
+
+  // 获取 OCR 历史记录的数量
+  ocrHistoryCount() {
+    const sql = 'SELECT COUNT(*) AS count FROM ocr_history';
+    return new Promise(resolve => {
+      this.db.get(sql, (err, row) => {
+        if (err) {
+          resolve(0);
+        } else {
+          resolve(row.count);
+        }
       });
     });
   }
 
   // 获取 OCR 历史记录
-  getOcrHistoryList(start = 0, count = 20) {
-    const ocrData = {};  // 用来存储查询出的 OCR 记录
+  async getOcrHistoryList(start = 0, count = 20) {
+    // 获取 OCR 历史记录的总数量
+    const ocrHistoryCount = await this.ocrHistoryCount();
+    // 没有记录就返回
+    if (ocrHistoryCount < 1) {
+      return { result: 'success', count: 0, list: [] };
+    }
 
-    return new Promise(resolve => {
-      // 获取 OCR 记录的数量
-      this.db.get('SELECT COUNT(*) FROM ocr_history', (err, row) => {
-        ocrData.count = row['COUNT(*)'];
-        // 所有数据查询完成就返回
-        if (ocrData.count !== undefined && ocrData.list !== undefined) {
-          resolve(ocrData);
-        }
-      });
+    // 从 start 位置查询出 count 条 OCR 记录
+    const sql = `
+    SELECT id, name, provider, ocr_time
+    FROM ocr_history
+    ORDER BY ocr_time DESC
+    LIMIT ?, ?
+    `;
 
-      // 从 start 位置查询出 count 条 OCR 记录
-      const sql = `
-      SELECT id, name, provider, ocr_time
-      FROM ocr_history
-      ORDER BY ocr_time DESC
-      LIMIT ?, ?
-      `;
-
+    return new Promise(async resolve => {
       this.db.all(sql, [start, count], (err, rows) => {
+        if (err) {
+          resolve({ result: 'error', msg: err.message });
+          return false;
+        }
         // 时间戳格式化
-        for (let i = 0;i < rows.length;i ++) {
+        for (let i = 0; i < rows.length; i++) {
           rows[i].ocr_time = Datetime.timestampFormat(rows[i].ocr_time);
         }
-        ocrData.list = rows;
-        // 所有数据查询完成就返回
-        if (ocrData.count !== undefined && ocrData.list !== undefined) {
-          resolve(ocrData);
-        }
+
+        resolve({ result: 'success', count: ocrHistoryCount, list: rows });
       });
     });
   }
 
   // 获取腾讯 OCR 记录总览
   getTencentOcrHistoryOverview() {
-    const dataList = [];  // 用来存储查询出的数据
+    const dataList = []; // 用来存储查询出的数据
     const monthFirstDay = Datetime.monthFirstDayTimestamp();
     // 要执行的 SQL
     const sqlList = [
@@ -557,15 +532,19 @@ module.exports = class Data {
   deleteAllOcrHistory(provider) {
     const sql = 'DELETE FROM ocr_history WHERE provider = ?';
     return new Promise(resolve => {
-      this.db.run(sql, [provider], function() {
-        resolve(this.changes);
+      this.db.run(sql, [provider], function (err) {
+        if (err) {
+          resolve({ result: 'error', msg: err.message });
+        } else {
+          resolve({ result: 'success', count: this.changes });
+        }
       });
     });
   }
 
   // 获取有道 OCR 记录总览
   getYoudaoOcrHistoryOverview() {
-    const dataList = [];  // 用来存储查询出的数据
+    const dataList = []; // 用来存储查询出的数据
     const monthFirstDay = Datetime.monthFirstDayTimestamp();
     // 要执行的 SQL
     const sqlList = [
@@ -600,7 +579,7 @@ module.exports = class Data {
 
   // 获取讯飞 OCR 记录总览
   getXunfeiOcrHistoryOverview() {
-    const dataList = [];  // 用来存储查询出的数据
+    const dataList = []; // 用来存储查询出的数据
     const monthFirstDay = Datetime.monthFirstDayTimestamp();
     // 要执行的 SQL
     const sqlList = [
@@ -635,7 +614,7 @@ module.exports = class Data {
 
   // 获取百度 OCR 记录总览
   getBaiduOcrHistoryOverview() {
-    const dataList = [];  // 用来存储查询出的数据
+    const dataList = []; // 用来存储查询出的数据
     const monthFirstDay = Datetime.monthFirstDayTimestamp();
     // 要执行的 SQL
     const sqlList = [
@@ -696,12 +675,18 @@ module.exports = class Data {
     (?, ?, ?)
     `;
     return new Promise(resolve => {
-      this.db.run(sql, [provider, time, wordCount], function(err) {
+      this.db.run(sql, [provider, time, wordCount], function (err) {
         if (err) {
-          resolve(err);
+          resolve({ result: 'error', msg: err.message });
           return false;
         }
-        resolve(this.changes);
+
+        if (this.changes < 1) {
+          resolve({ result: 'error', msg: '无法添加数据！' });
+          return false;
+        }
+
+        resolve({ result: 'success', count: this.changes });
       });
     });
   }
@@ -717,14 +702,13 @@ module.exports = class Data {
     )
     `;
     return new Promise((resolve, reject) => {
-      this.db.run(sql, err => {
+      this.db.run(sql, async err => {
         if (err) {
-          reject(err);
+          resolve({ result: 'error', msg: err.message });
           return false;
         }
-        this.translationHistoryTableExists().then(result => {
-          resolve(result);
-        });
+        const result = await this.translationHistoryTableExists();
+        resolve(result);
       });
     });
   }
@@ -732,8 +716,26 @@ module.exports = class Data {
   // 清空翻译历史记录
   deleteAllTranslationHistory() {
     return new Promise(resolve => {
-      this.db.run('DELETE FROM translation_history', function() {
-        resolve(this.changes);
+      this.db.run('DELETE FROM translation_history', function (err) {
+        if (err) {
+          resolve({ result: 'error', msg: err.message });
+        } else {
+          resolve({ result: 'success', count: this.changes });
+        }
+      });
+    });
+  }
+
+  // 获取翻译记录的数量
+  getTranslationHistoryCount() {
+    const sql = 'SELECT COUNT(*) AS count FROM translation_history';
+    return new Promise(resolve => {
+      this.db.get(sql, (err, row) => {
+        if (err) {
+          resolve(0);
+        } else {
+          resolve(row.count);
+        }
       });
     });
   }
@@ -742,15 +744,13 @@ module.exports = class Data {
   getTranslationHistoryList(start = 0, count = 20) {
     const dataList = {};
 
-    return new Promise(resolve => {
-      // 查询出总量
-      this.db.get('SELECT COUNT(*) FROM translation_history', (err, row) => {
-        dataList.count = row['COUNT(*)'];
-        // 全部查询完毕就返回
-        if (dataList.count !== undefined && dataList.list !== undefined) {
-          resolve(dataList);
-        }
-      });
+    return new Promise(async resolve => {
+      // 获取翻译记录数量
+      const historyCount = await this.getTranslationHistoryCount();
+      if (historyCount < 1) {
+        resolve({ result: 'success', count: 0, list: [] });
+        return false;
+      }
 
       // 从 start 开始，查询出 count 条翻译记录
       const sql = `
@@ -761,14 +761,11 @@ module.exports = class Data {
       `;
       this.db.all(sql, [start, count], (err, rows) => {
         // 时间格式化
-        for (let i = 0;i < rows.length;i ++) {
+        for (let i = 0; i < rows.length; i++) {
           rows[i].translation_time = Datetime.timestampFormat(rows[i].translation_time);
         }
-        dataList.list = rows;
-        // 全部查询完毕就返回
-        if (dataList.count !== undefined && dataList.list !== undefined) {
-          resolve(dataList);
-        }
+
+        resolve({ result: 'success', count: historyCount, list: rows });
       });
     });
   }
@@ -781,7 +778,7 @@ module.exports = class Data {
       this.db.get('SELECT SUM(word_count) AS count FROM translation_history', (err, row) => {
         dataList.push({
           name: '百度翻译总字数',
-          count: row.count === null?0:row.count
+          count: row.count === null ? 0 : row.count
         });
         // 如果全部查询完毕就返回数据
         if (dataList.length === 2) resolve(dataList);
@@ -796,7 +793,7 @@ module.exports = class Data {
       this.db.get(sql, [Datetime.monthFirstDayTimestamp()], (err, row) => {
         dataList.push({
           name: '本月百度翻译字数',
-          count: row.count === null?0:row.count
+          count: row.count === null ? 0 : row.count
         });
         // 如果全部查询完毕就返回数据
         if (dataList.length === 2) resolve(dataList);
@@ -811,13 +808,13 @@ module.exports = class Data {
     SELECT COUNT(*) FROM sqlite_master
     WHERE type="table" AND name="ocr_history"
     `;
-    return new Promise((resolve, reject) => {
+    return new Promise(resolve => {
       this.db.get(sql, (err, row) => {
         if (err) {
-          reject(err);
+          resolve({ result: 'error', msg: err.message });
           return false;
         }
-        resolve(row['COUNT(*)']);
+        resolve({ result: 'success', count: row['COUNT(*)'] });
       });
     });
   }
@@ -829,13 +826,13 @@ module.exports = class Data {
     SELECT COUNT(*) FROM sqlite_master
     WHERE type="table" AND name="translation_history"
     `;
-    return new Promise((resolve, reject) => {
+    return new Promise(resolve => {
       this.db.get(sql, (err, row) => {
         if (err) {
-          reject(err);
+          resolve({ result: 'error', msg: err.message });
           return false;
         }
-        resolve(row['COUNT(*)']);
+        resolve({ result: 'success', count: row['COUNT(*)'] });
       });
     });
   }
@@ -847,13 +844,13 @@ module.exports = class Data {
     SELECT COUNT(*) FROM sqlite_master
     WHERE type="table" AND name="ocr_options"
     `;
-    return new Promise((resolve, reject) => {
+    return new Promise(resolve => {
       this.db.get(sql, (err, row) => {
         if (err) {
-          reject(err);
+          resolve({ result: 'error', msg: err.message });
           return false;
         }
-        resolve(row['COUNT(*)']);
+        resolve({ result: 'success', count: row['COUNT(*)'] });
       });
     });
   }

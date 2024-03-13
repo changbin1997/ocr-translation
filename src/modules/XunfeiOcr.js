@@ -54,8 +54,8 @@ module.exports = class XunfeiOcr {
         // 识别出错
         if (result.data.header.message !== 'success') {
           resolve({
-            msg: result.data.header.message,
-            code: result.data.header.code
+            result: 'error',
+            msg: `${result.data.header.code} ${result.data.header.message}`
           });
           return false;
         }
@@ -66,12 +66,12 @@ module.exports = class XunfeiOcr {
           text = Buffer.from(result.data.payload.result.text, 'base64').toString('utf-8');
           text = JSON.parse(text);
         } catch (error) {
-          resolve({code: 0, msg: error.message});
+          resolve({result: 'error', msg: error.message});
           return false;
         }
         // 是否按照预期返回识别结果
         if (text.pages[0].lines === undefined || text.pages[0].lines[0].words[0].content === undefined) {
-          resolve({code: 0, msg: '讯飞服务器未能返回识别文字！'});
+          resolve({result: 'error', msg: '讯飞服务器未能返回识别文字！'});
           return false;
         }
         const textList = [];
@@ -79,12 +79,16 @@ module.exports = class XunfeiOcr {
         text.pages[0].lines.forEach(val => {
           textList.push(val.words[0].content);
         });
-        resolve(textList);
+        resolve({result: 'success', list: textList});
       }).catch(error => {
-        resolve({
-          msg: error.response.data.message !== undefined ? error.response.data.message : error.message,
-          code: error.response.status
-        });
+        if (error.response) {
+          resolve({
+            result: 'error',
+            msg: `${error.response.status} ${error.response.data.message}`
+          });
+        }else {
+          resolve({result: 'error', msg: `${error.code} ${error.message}`});
+        }
       });
     });
   }

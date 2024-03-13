@@ -40,19 +40,32 @@ export default {
   },
   methods: {
     // 获取翻译历史记录
-    getTranslationHistoryList() {
+    async getTranslationHistoryList() {
       // 要提交的数据
       const submitData = {
         start: this.pageNum * 20 - 20,
         count: 20
       };
       // 发送请求
-      window.electronAPI.ipcRenderer.invoke('translationHistoryList', submitData).then(result => {
-        this.count = result.count;
-        this.translationList = result.list;
-        // 计算总页数
-        this.pageCount = Math.ceil(this.count / 20);
-      });
+      const result = await window.electronAPI.ipcRenderer.invoke('translationHistoryList', submitData);
+      // 出错
+      if (result.result !== 'success') {
+        window.electronAPI.ipcRenderer.invoke('dialog', {
+          name: 'showMessageBox',
+          options: {
+            title: '查询数据出错',
+            message: result.msg,
+            buttons: ['关闭'],
+            type: 'error',
+            noLink: true
+          }
+        });
+        return false;
+      }
+      this.count = result.count;
+      this.translationList = result.list;
+      // 计算总页数
+      this.pageCount = Math.ceil(this.count / 20);
     },
     // 下一页
     nextPage() {
