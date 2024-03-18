@@ -32,7 +32,7 @@ module.exports = class YoudaoOcr {
         }
 
         // 是否按照格式返回结果
-        if (result.data.Result === undefined || result.data.Result.regions[0].lines[0].text === undefined) {
+        if (result.data.Result === undefined || result.data.Result.regions?.[0].lines?.[0].text === undefined) {
           resolve({result: 'error', msg: '有道服务器未能返回识别文字！'});
           return false;
         }

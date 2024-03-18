@@ -61,6 +61,12 @@ module.exports = class BaiduTranslation {
           return  false;
         }
 
+        // 百度服务器是否返回翻译结果
+        if (result.data.trans_result === undefined || result.data.trans_result.length < 1) {
+          resolve({result: 'error', msg: '百度翻译未能返回翻译结果！'});
+          return false;
+        }
+
         // 添加到翻译历史记录
         await this.data.addTranslationHistory('baidu', q.length);
         resolve({ result: 'success', data: result.data });

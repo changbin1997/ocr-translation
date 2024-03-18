@@ -70,7 +70,7 @@ module.exports = class XunfeiOcr {
           return false;
         }
         // 是否按照预期返回识别结果
-        if (text.pages[0].lines === undefined || text.pages[0].lines[0].words[0].content === undefined) {
+        if (text.pages?.[0].lines === undefined || text.pages?.[0].lines?.[0].words?.[0].content === undefined) {
           resolve({result: 'error', msg: '讯飞服务器未能返回识别文字！'});
           return false;
         }
