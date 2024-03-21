@@ -26,7 +26,9 @@ app.on('ready', async () => {
   });
 
   // 隐藏菜单栏
-  Menu.setApplicationMenu(null);
+  if (app.isPackaged) {
+    Menu.setApplicationMenu(null);
+  }
 
   // 加载页面文件
   if (app.isPackaged) {
@@ -124,6 +126,35 @@ app.on('ready', async () => {
       disabled = false; // 识别完成后恢复截图
       // 取消截图
       if (result === null) return false;
+      if (result.result !== 'success') {
+        await dialog.showMessageBox(BrowserWindow.getFocusedWindow(), {
+          title: 'OCR 识别出错',
+          message: result.msg,
+          type: 'error',
+          buttons: ['关闭'],
+          noLink: true
+        });
+        return false;
+      }
+      mainWindow.webContents.send('ocrResult', result);
+    });
+  }
+  // 如果开启了 F3 指定区域识别
+  if (options.options.specificArea) {
+    globalShortcut.register('F3', async () => {
+      if (disabled) return false;
+      disabled = true; // 正在识别时禁用截图
+      // 调用截取指定区域识别
+      const result = await screenshotOcr.specificArea(
+        options.options.specificAreaProvider,
+        options.options.specificAreaApi,
+        options.options.specificAreaLeft,
+        options.options.specificAreaTop,
+        options.options.specificAreaWidth,
+        options.options.specificAreaHeight
+      );
+      disabled = false; // 识别完成后恢复截图
+      // 识别出错
       if (result.result !== 'success') {
         await dialog.showMessageBox(BrowserWindow.getFocusedWindow(), {
           title: 'OCR 识别出错',

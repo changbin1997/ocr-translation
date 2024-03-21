@@ -169,11 +169,16 @@ module.exports = class Data {
         options.ocrAutoVoice = Boolean(Number(options.ocrAutoVoice));
         options.translationAutoVoice = Boolean(Number(options.translationAutoVoice));
         options.autoTranslation = Boolean(Number(options.autoTranslation));
+        options.specificArea = Boolean(Number(options.specificArea));
         // 把 Number 类型的值转为 Number
         options.ocrVoiceSpeed = Number(options.ocrVoiceSpeed);
         options.ocrVoiceVolume = Number(options.ocrVoiceVolume);
         options.translationVoiceVolume = Number(options.translationVoiceVolume);
         options.translationVoiceSpeed = Number(options.translationVoiceSpeed);
+        options.specificAreaLeft = Number(options.specificAreaLeft);
+        options.specificAreaTop = Number(options.specificAreaTop);
+        options.specificAreaWidth = Number(options.specificAreaWidth);
+        options.specificAreaHeight = Number(options.specificAreaHeight);
         resolve({ result: 'success', options: options });
       });
     });
@@ -260,6 +265,13 @@ module.exports = class Data {
       keyF2Enable: false,
       keyF2Function: '腾讯云通用印刷体识别',
       keyF2Provider: 'tencent',
+      specificArea: false,
+      specificAreaLeft: 0,
+      specificAreaTop: 0,
+      specificAreaWidth: 300,
+      specificAreaHeight: 300,
+      specificAreaApi: '腾讯云通用印刷体识别',
+      specificAreaProvider: 'tencent',
       ocrAutoVoice: false,
       translationAutoVoice: false,
       autoTranslation: false

@@ -3,6 +3,12 @@ const Ocr = require('./Ocr');  // OCR 模块
 const BaiduTranslation = require('./BaiduTranslation');  // 百度翻译模块
 const Data = require('./Data');  // 数据库操作模块
 const ContextMenu = require('./contextMenu');  // 上下文菜单模块
+const selectorWindow = require('./selector-window');
+
+// 打开屏幕区域选择窗口
+ipcMain.handle('selector-window',  async () => {
+  return await selectorWindow();
+});
 
 // 显示对话框
 ipcMain.handle('dialog', async (ev, args) => {
@@ -10,7 +16,7 @@ ipcMain.handle('dialog', async (ev, args) => {
 });
 
 // 是否是图片文件
-ipcMain.handle('isImage',  (ev, args) => {;
+ipcMain.handle('isImage',  (ev, args) => {
   return Ocr.isImage(args);
 });
 

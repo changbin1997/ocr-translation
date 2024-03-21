@@ -143,6 +143,40 @@
         </div>
       </div>
       <div class="mb-4"></div>
+      <p class="mb-2"><b>指定区域识别</b></p>
+      <div aria-label="指定区域识别" role="group">
+        <div class="mb-3">
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" value="" id="specific-area" v-model="optionsSelected.specificArea">
+            <label class="form-check-label" for="specific-area">启用指定区域识别（快捷键F3）</label>
+          </div>
+        </div>
+        <div class="mb-3">
+          <label for="specific-area-left" class="form-label">识别区域左侧起始位置</label>
+          <input type="number" id="specific-area-left" class="form-control" placeholder="识别区域左侧起始位置（px）" v-model="optionsSelected.specificAreaLeft" :disabled="!optionsSelected.specificArea">
+        </div>
+        <div class="mb-3">
+          <label for="specific-area-top" class="form-label">识别区域顶部起始位置</label>
+          <input type="number" id="specific-area-top" class="form-control" placeholder="识别区域顶部起始位置（px）" v-model="optionsSelected.specificAreaTop" :disabled="!optionsSelected.specificArea">
+        </div>
+        <div class="mb-3">
+          <label for="specific-area-width" class="form-label">识别区域宽度</label>
+          <input type="number" id="specific-area-width" class="form-control" placeholder="识别区域宽度（px）" v-model="optionsSelected.specificAreaWidth" :disabled="!optionsSelected.specificArea">
+        </div>
+        <div class="mb-3">
+          <label for="specific-area-height" class="form-label">识别区域高度</label>
+          <input type="number" id="specific-area-height" class="form-control" placeholder="识别区域高度（px）" v-model="optionsSelected.specificAreaHeight" :disabled="!optionsSelected.specificArea">
+        </div>
+        <div class="mb-3">
+          <button type="button" class="btn btn-outline-primary" @click="openSelector">使用屏幕区域选择器选择识别区域</button>
+        </div>
+        <div class="mb-3">
+          <label for="specific-area-api" class="form-label">指定区域识别使用的接口</label>
+          <select id="specific-area-api" class="form-select" v-model="optionsSelected.specificAreaApi" :disabled="!optionsSelected.specificArea">
+            <option v-for="(item, index) of hotKeyFunction" :key="index" v-bind:value="item.name">{{item.name}}</option>
+          </select>
+        </div>
+      </div>
       <p class="mb-2"><b>自动执行</b></p>
       <div aria-label="自动执行" role="group">
         <div class="mb-3">
@@ -213,6 +247,13 @@ export default {
         keyF2Enable: false,
         keyF2Function: '腾讯云通用印刷体识别',
         keyF2Provider: 'tencent',
+        specificArea: false,
+        specificAreaLeft: 0,
+        specificAreaTop: 0,
+        specificAreaWidth: 300,
+        specificAreaHeight: 300,
+        specificAreaApi: '腾讯云通用印刷体识别',
+        specificAreaProvider: 'tencent',
         ocrAutoVoice: false,
         translationAutoVoice: false,
         autoTranslation: false
@@ -233,6 +274,28 @@ export default {
     }
   },
   methods: {
+    // 打开屏幕区域选择器
+    async openSelector() {
+      const result = await window.electronAPI.ipcRenderer.invoke('selector-window');
+      if (result.result !== 'success') {
+        await window.electronAPI.ipcRenderer.invoke('dialog', {
+          name: 'showMessageBox',
+          options: {
+            title: '截取屏幕出错',
+            message: result.msg,
+            buttons: ['关闭'],
+            type: 'error',
+            noLink: true
+          }
+        });
+        return false;
+      }
+
+      this.optionsSelected.specificAreaLeft = result.left;
+      this.optionsSelected.specificAreaTop = result.top;
+      this.optionsSelected.specificAreaWidth = result.width;
+      this.optionsSelected.specificAreaHeight = result.height;
+    },
     // 测试语音朗读效果
     voiceTest(ev) {
       const text = '你好，很高兴认识你。Hello, Nice to meet you.';  // 语音测试朗读的内容
@@ -283,14 +346,10 @@ export default {
       // 要保存的数据
       const submitData = this.optionsSelected;
       // 设置全局快捷键调用的提供商
-      this.hotKeyFunction.forEach(item => {
-        if (this.optionsSelected.keyF1Function === item.name) {
-          submitData.keyF1Provider = item.provider;
-        }
-        if (this.optionsSelected.keyF2Function === item.name) {
-          submitData.keyF2Provider = item.provider;
-        }
-      });
+      submitData.keyF1Provider = this.hotKeyFunction.find(item => item.name === this.optionsSelected.keyF2Function).provider;
+      submitData.keyF2Provider = this.hotKeyFunction.find(item => item.name === this.optionsSelected.keyF2Function).provider;
+      // 设置指定区域识别调用的提供商
+      submitData.specificAreaProvider = this.hotKeyFunction.find(item => item.name === this.optionsSelected.specificAreaApi).provider;
       // 更新 Vuex 存储的选项
       this.$store.commit('changeOptions', submitData);
       // 禁用保存按钮
@@ -301,7 +360,7 @@ export default {
       this.disabledSaveBtn = false;
       // 保存出错
       if (result.result !== 'success') {
-        window.electronAPI.ipcRenderer.invoke('dialog', {
+        await window.electronAPI.ipcRenderer.invoke('dialog', {
           name: 'showMessageBox',
           options: {
             title: '更新数据出错',
@@ -313,7 +372,7 @@ export default {
         });
         return false;
       }
-      window.electronAPI.ipcRenderer.invoke('dialog', {
+      await window.electronAPI.ipcRenderer.invoke('dialog', {
         name: 'showMessageBox',
         options: {
           title: '已成功保存',

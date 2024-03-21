@@ -3,6 +3,8 @@ const fs = require('fs');
 const child_process = require('child_process');
 const {clipboard} = require('electron');
 const Ocr = require('./Ocr');
+const screenshotDesktop = require('screenshot-desktop');
+const jimp = require('jimp');
 
 module.exports = class ScreenshotOcr {
   options = null;  // 选项
@@ -39,6 +41,34 @@ module.exports = class ScreenshotOcr {
     if (this.options.youdaoOcrAppID !== '' && this.options.youdaoOcrAppKey !== '') {
       this.available.youdao = true;
     }
+  }
+
+  // 指定区域识别
+  async specificArea(provider, ocrType, left, top, width, height) {
+    // 检查接口是否可用
+    if (!this.available[provider]) {
+      return {result: 'error', msg: `缺少 ${this.providerList[provider]} API 密钥！`};
+    }
+    // 截图和裁剪图片
+    let img = null;
+    try {
+      // 截图
+      img = await screenshotDesktop();
+      // 裁剪图片
+      img = await jimp.read(img);
+      img = await img.crop(left, top, width, height);
+      img = await img.getBufferAsync(jimp.MIME_JPEG);
+      img = img.toString('base64');
+    }catch (error) {
+      return {result: 'error', msg: error.message};
+    }
+    // 调用 OCR 识别
+    const ocr = new Ocr(this.options);
+    const result = await ocr[provider](ocrType, img);
+    // 识别出错
+    if (result.result !== 'success') return result;
+    result.img = img;
+    return result;
   }
 
   // 识别
