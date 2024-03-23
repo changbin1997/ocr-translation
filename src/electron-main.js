@@ -46,7 +46,7 @@ app.on('ready', async () => {
 
   // 如果无法打开数据库
   if (data.dbErr !== null) {
-    await dialog.showMessageBox(BrowserWindow.getFocusedWindow(), {
+    await dialog.showMessageBox(mainWindow, {
       title: '无法初始化数据库',
       message: '无法打开和初始化数据库，程序无法正常运行！',
       type: 'error',
@@ -61,7 +61,7 @@ app.on('ready', async () => {
   const initResult = await data.init();
   // 出错
   if (initResult.result !== 'success') {
-    await dialog.showMessageBox(BrowserWindow.getFocusedWindow(), {
+    await dialog.showMessageBox(mainWindow, {
       title: '数据库初始化错误',
       message: initResult.msg,
       type: 'error',
@@ -76,7 +76,7 @@ app.on('ready', async () => {
   let options = await data.getOptions();
   // 出错
   if (options.result !== 'success') {
-    await dialog.showMessageBox(BrowserWindow.getFocusedWindow(), {
+    await dialog.showMessageBox(mainWindow, {
       title: '查询数据出错！',
       message: options.msg,
       type: 'error',
@@ -101,7 +101,7 @@ app.on('ready', async () => {
       // 取消截图
       if (result === null) return false;
       if (result.result !== 'success') {
-        await dialog.showMessageBox(BrowserWindow.getFocusedWindow(), {
+        await dialog.showMessageBox(mainWindow, {
           title:'OCR 识别出错',
           message: result.msg,
           type: 'error',
@@ -127,7 +127,7 @@ app.on('ready', async () => {
       // 取消截图
       if (result === null) return false;
       if (result.result !== 'success') {
-        await dialog.showMessageBox(BrowserWindow.getFocusedWindow(), {
+        await dialog.showMessageBox(mainWindow, {
           title: 'OCR 识别出错',
           message: result.msg,
           type: 'error',
@@ -156,7 +156,7 @@ app.on('ready', async () => {
       disabled = false; // 识别完成后恢复截图
       // 识别出错
       if (result.result !== 'success') {
-        await dialog.showMessageBox(BrowserWindow.getFocusedWindow(), {
+        await dialog.showMessageBox(mainWindow, {
           title: 'OCR 识别出错',
           message: result.msg,
           type: 'error',

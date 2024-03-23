@@ -242,7 +242,7 @@ export default {
         translationVoiceSpeed: 2,
         translationVoiceVolume: 10,
         keyF1Enable: false,
-        keyF1Function: '百度通用OCR识别',
+        keyF1Function: '百度云通用文字识别（标准版）',
         keyF1Provider: 'baidu',
         keyF2Enable: false,
         keyF2Function: '腾讯云通用印刷体识别',
@@ -260,8 +260,8 @@ export default {
       },
       voiceLibraryList: [],
       hotKeyFunction: [
-        {provider: 'baidu', name: '百度通用OCR识别'},
-        {provider: 'baidu', name: '百度高精度OCR识别'},
+        {provider: 'baidu', name: '百度云通用文字识别（标准版）'},
+        {provider: 'baidu', name: '百度云通用文字识别（高精度版）'},
         {provider: 'tencent', name: '腾讯云通用印刷体识别'},
         {provider: 'tencent', name: '腾讯云通用印刷体识别（高精度版）'},
         {provider: 'tencent', name: '腾讯云通用手写体识别'},
@@ -346,7 +346,7 @@ export default {
       // 要保存的数据
       const submitData = this.optionsSelected;
       // 设置全局快捷键调用的提供商
-      submitData.keyF1Provider = this.hotKeyFunction.find(item => item.name === this.optionsSelected.keyF2Function).provider;
+      submitData.keyF1Provider = this.hotKeyFunction.find(item => item.name === this.optionsSelected.keyF1Function).provider;
       submitData.keyF2Provider = this.hotKeyFunction.find(item => item.name === this.optionsSelected.keyF2Function).provider;
       // 设置指定区域识别调用的提供商
       submitData.specificAreaProvider = this.hotKeyFunction.find(item => item.name === this.optionsSelected.specificAreaApi).provider;

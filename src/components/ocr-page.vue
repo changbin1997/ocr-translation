@@ -56,8 +56,8 @@ export default {
   data() {
     return {
       ocrType: [
-        {provider: 'baidu', name: '百度通用OCR识别'},
-        {provider: 'baidu', name: '百度高精度OCR识别'},
+        {provider: 'baidu', name: '百度云通用文字识别（标准版）'},
+        {provider: 'baidu', name: '百度云通用文字识别（高精度版）'},
         {provider: 'tencent', name: '腾讯云通用印刷体识别'},
         {provider: 'tencent', name: '腾讯云通用印刷体识别（高精度版）'},
         {provider: 'tencent', name: '腾讯云通用手写体识别'},
@@ -65,7 +65,7 @@ export default {
         {provider: 'xunfei', name: '科大讯飞通用文字识别'},
         {provider: 'youdao', name: '有道智云通用文字识别'}
       ],
-      ocrTypeSelectde: '百度通用OCR识别',
+      ocrTypeSelectde: '百度云通用文字识别（标准版）',
       showGuide: true,
       imgOptions: {show: false, url: ''},
       ocrText: '',
@@ -296,7 +296,7 @@ export default {
     },
     // 检查当前使用的 API 是否填写密钥信息
     apiAvailable() {
-      const providerName = {baidu: '百度', tencent: '腾讯', xunfei: '讯飞'};
+      const providerName = {baidu: '百度', tencent: '腾讯', xunfei: '讯飞', youdao: '有道'};
       let status = true;
       // 获取 OCR 提供商
       for (let i = 0;i < this.ocrType.length;i ++) {

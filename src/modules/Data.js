@@ -260,7 +260,7 @@ module.exports = class Data {
       translationVoiceVolume: 10,
       translationVoiceSpeed: 2,
       keyF1Enable: false,
-      keyF1Function: '百度通用OCR识别',
+      keyF1Function: '百度云通用文字识别（标准版）',
       keyF1Provider: 'baidu',
       keyF2Enable: false,
       keyF2Function: '腾讯云通用印刷体识别',
@@ -644,20 +644,20 @@ module.exports = class Data {
         values: ['baidu', monthFirstDay]
       },
       {
-        name: '本月百度通用OCR识别使用量',
+        name: '本月百度云通用文字识别（标准版）使用量',
         sql: `
         SELECT COUNT(*) FROM ocr_history
         WHERE name = ? AND ocr_time > ?
         `,
-        values: ['百度通用OCR识别', monthFirstDay]
+        values: ['百度云通用文字识别（标准版）', monthFirstDay]
       },
       {
-        name: '本月百度高精度OCR识别使用量',
+        name: '本月百度云通用文字识别（高精度版）使用量',
         sql: `
         SELECT COUNT(*) FROM ocr_history
         WHERE name = ? AND ocr_time > ?
         `,
-        values: ['百度高精度OCR识别', monthFirstDay]
+        values: ['百度云通用文字识别（高精度版）', monthFirstDay]
       }
     ];
 

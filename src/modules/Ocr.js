@@ -22,16 +22,19 @@ module.exports = class Ocr {
     HttpClient.setRequestOptions({timeout: 15000});
 
     const client = new AipOcrClient(this.options.baiduOcrAppID, this.options.baiduOcrApiKey, this.options.baiduOcrSecretKey);
-
-    let result = null;
-    if (type === '百度通用OCR识别') {
-      // 通用文字识别
-      result = client.generalBasic(base64File);
-    } else {
-      result = client.accurateBasic(base64File);
-    }
     // 调整返回的内容
     return new Promise((resolve) => {
+      let result = null;
+      if (type === '百度云通用文字识别（标准版）') {
+        // 通用文字识别
+        result = client.generalBasic(base64File);
+      } else if (type === '百度云通用文字识别（高精度版）') {
+        result = client.accurateBasic(base64File);
+      }else {
+        resolve({result: 'error', msg: '不支持的 API 接口！'});
+        return false;
+      }
+
       result.then(async data => {
         // 是否出错
         if (data.error_msg !== undefined && data.error_code !== undefined) {
@@ -77,25 +80,29 @@ module.exports = class Ocr {
         }
       }
     });
-    // 用来存储识别结果
-    let result = null;
-    // 根据传入的识别类型调用识别
-    switch (type) {
-      case '腾讯云通用印刷体识别':
-        result = client.GeneralBasicOCR({ImageBase64: base64File});
-        break;
-      case '腾讯云通用印刷体识别（高精度版）':
-        result = client.GeneralAccurateOCR({ImageBase64: base64File});
-        break;
-      case '腾讯云通用手写体识别':
-        result = client.GeneralHandwritingOCR({ImageBase64: base64File});
-        break;
-      default:
-        result = client.AdvertiseOCR({ImageBase64: base64File});
-        break;
-    }
-    // 处理识别结果并返回
-    return new Promise((resolve) => {
+
+    return new Promise(resolve => {
+      // 用来存储识别结果
+      let result = null;
+      // 根据传入的识别类型调用识别
+      switch (type) {
+        case '腾讯云通用印刷体识别':
+          result = client.GeneralBasicOCR({ImageBase64: base64File});
+          break;
+        case '腾讯云通用印刷体识别（高精度版）':
+          result = client.GeneralAccurateOCR({ImageBase64: base64File});
+          break;
+        case '腾讯云通用手写体识别':
+          result = client.GeneralHandwritingOCR({ImageBase64: base64File});
+          break;
+        case '腾讯云广告文字识别':
+          result = client.AdvertiseOCR({ImageBase64: base64File});
+          break;
+        default:
+          resolve({result: 'error', msg: '不支持的 API 接口！'});
+          return false;
+      }
+
       result.then(async data => {
         // 添加 OCR 历史记录
         await this.data.addOcrHistory('tencent', type);
@@ -107,7 +114,7 @@ module.exports = class Ocr {
         resolve({ result: 'success', list: resultList });
       }).catch(error => {
         resolve({result: 'error', msg: `${error.code} ${error.message}`});
-      })
+      });
     });
   }
 
