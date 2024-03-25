@@ -1,4 +1,4 @@
-const { app, BrowserWindow, globalShortcut, dialog, Menu } = require('electron');
+const { app, BrowserWindow, globalShortcut, dialog, Menu, Tray } = require('electron');
 const path = require('path');
 const ScreenshotOcr = require('./modules/screenshotOcr'); // 截图模块
 const Data = require('./modules/Data'); // 数据库操作模块
@@ -8,6 +8,7 @@ const data = new Data();
 
 let mainWindow; // 用来保存主窗口对象的引用
 let disabled = false; // 用于禁用截图识别
+let tray = null;  // 用来存储系统托盘
 
 // 当 Electron 完成初始化并准备创建浏览器窗口时被调用
 app.on('ready', async () => {
@@ -168,6 +169,37 @@ app.on('ready', async () => {
       mainWindow.webContents.send('ocrResult', result);
     });
   }
+
+  // 创建托盘图标菜单
+  tray = new Tray(path.join(__dirname, 'icon.ico'));
+  // 菜单模板
+  const trayMenu = [
+    {
+      label: '显示主窗口',
+      click: () => {
+        if (mainWindow.isVisible()) return false;
+        mainWindow.show();
+      }
+    },
+    {
+      label: '退出',
+      role: 'quit'
+    }
+  ];
+  // 创建菜单
+  tray.setContextMenu(Menu.buildFromTemplate(trayMenu));
+  // 托盘图标设置提示文字
+  tray.setToolTip(`OCR识别翻译 - 快捷键 F1 ${options.options.keyF1Function} F2 ${options.options.keyF2Function}`);
+  // 托盘图标点击
+  tray.on('click', () => {
+    if (mainWindow.isVisible()) return false;
+    mainWindow.show();
+  });
+
+  // 窗口最小化
+  mainWindow.on('minimize', () => {
+    mainWindow.hide();
+  });
 });
 
 // 用于处理 IPC 请求

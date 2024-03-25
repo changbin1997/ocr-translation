@@ -56,7 +56,8 @@
     "asar": true,
     "win": {
       "target": "nsis",
-      "legalTrademarks": "changbin1997"
+      "legalTrademarks": "changbin1997",
+      "icon": "src/icon.ico"
     },
     "nsis": {
       "oneClick": false,
