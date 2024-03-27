@@ -42,6 +42,7 @@ app.on('ready', async () => {
 
   // 关闭事件
   mainWindow.on('closed', () => {
+    globalShortcut.unregisterAll();
     mainWindow = null;
   });
 
@@ -88,15 +89,15 @@ app.on('ready', async () => {
     app.quit();
   }
   const screenshotOcr = new ScreenshotOcr(options.options);
-  // 如果开启了 F1 全局快捷键
-  if (options.options.keyF1Enable) {
-    // F1快捷键事件
-    globalShortcut.register('F1', async () => {
+  // 如果开启了全局快捷键1
+  if (options.options.key1Enable) {
+    // 快捷键1事件
+    globalShortcut.register(options.options.key1Name, async () => {
       if (disabled) return false;
       disabled = true; // 正在识别时禁用截图
       const result = await screenshotOcr.ocr(
-        options.options.keyF1Provider,
-        options.options.keyF1Function
+        options.options.key1Provider,
+        options.options.key1Function
       );
       disabled = false; // 识别完成后恢复截图
       // 取消截图
@@ -114,15 +115,15 @@ app.on('ready', async () => {
       mainWindow.webContents.send('ocrResult', result);
     });
   }
-  // 如果开启了 F2 全局快捷键
-  if (options.options.keyF2Enable) {
-    // F2快捷键事件
-    globalShortcut.register('F2', async () => {
+  // 如果开启了全局快捷键2
+  if (options.options.key2Enable) {
+    // 快捷键2事件
+    globalShortcut.register(options.options.key2Name, async () => {
       if (disabled) return false;
       disabled = true; // 正在识别时禁用截图
       const result = await screenshotOcr.ocr(
-        options.options.keyF2Provider,
-        options.options.keyF2Function
+        options.options.key2Provider,
+        options.options.key2Function
       );
       disabled = false; // 识别完成后恢复截图
       // 取消截图
@@ -140,9 +141,9 @@ app.on('ready', async () => {
       mainWindow.webContents.send('ocrResult', result);
     });
   }
-  // 如果开启了 F3 指定区域识别
+  // 如果开启了指定区域识别
   if (options.options.specificArea) {
-    globalShortcut.register('F3', async () => {
+    globalShortcut.register(options.options.specificAreaKeyName, async () => {
       if (disabled) return false;
       disabled = true; // 正在识别时禁用截图
       // 调用截取指定区域识别
@@ -189,7 +190,7 @@ app.on('ready', async () => {
   // 创建菜单
   tray.setContextMenu(Menu.buildFromTemplate(trayMenu));
   // 托盘图标设置提示文字
-  tray.setToolTip(`OCR识别翻译 - 快捷键 F1 ${options.options.keyF1Function} F2 ${options.options.keyF2Function}`);
+  tray.setToolTip(`OCR识别翻译\n${options.options.key1Name}：${options.options.key1Function}\n${options.options.key2Name}：${options.options.key2Function}`);
   // 托盘图标点击
   tray.on('click', () => {
     if (mainWindow.isVisible()) return false;

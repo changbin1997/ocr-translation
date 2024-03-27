@@ -115,29 +115,37 @@
       <!--快捷键-->
       <p class="mb-2"><b>全局快捷键</b></p>
       <div aria-label="快捷键" role="group">
-        <!--F1快捷键-->
+        <!--快捷键1-->
         <div class="mb-3">
           <div class="form-check">
-            <input class="form-check-input" type="checkbox" value="" id="key-f1" v-model="optionsSelected.keyF1Enable">
-            <label class="form-check-label" for="key-f1">启用 F1 全局快捷键</label>
+            <input class="form-check-input" type="checkbox" value="" id="key-f1" v-model="optionsSelected.key1Enable">
+            <label class="form-check-label" for="key-f1">启用全局快捷键1</label>
           </div>
         </div>
         <div class="mb-3">
-          <label for="key-f1-function" class="form-label">F1 快捷键的功能</label>
-          <select id="key-f1-function" class="form-select" v-model="optionsSelected.keyF1Function" :disabled="!optionsSelected.keyF1Enable">
+          <label for="key1-name" class="form-label">快捷键1要使用的快捷键</label>
+          <input type="text" id="key1-name" class="form-control" placeholder="在这里按下要使用的快捷键" @keydown="getKeyName($event, 'key1Name')" v-model="optionsSelected.key1Name" readonly>
+        </div>
+        <div class="mb-3">
+          <label for="key-f1-function" class="form-label">快捷键1使用的接口</label>
+          <select id="key-f1-function" class="form-select" v-model="optionsSelected.key1Function" :disabled="!optionsSelected.key1Enable">
             <option v-for="(item, index) of hotKeyFunction" :key="index" v-bind:value="item.name">{{item.name}}</option>
           </select>
         </div>
-        <!--F2快捷键-->
+        <!--快捷键2-->
         <div class="mb-3">
           <div class="form-check">
-            <input class="form-check-input" type="checkbox" value="" id="key-f2" v-model="optionsSelected.keyF2Enable">
-            <label class="form-check-label" for="key-f2">启用 F2 全局快捷键</label>
+            <input class="form-check-input" type="checkbox" value="" id="key-f2" v-model="optionsSelected.key2Enable">
+            <label class="form-check-label" for="key-f2">启用全局快捷键2</label>
           </div>
         </div>
         <div class="mb-3">
-          <label for="key-f2-function" class="form-label">F2 快捷键的功能</label>
-          <select id="key-f2-function" class="form-select" v-model="optionsSelected.keyF2Function" :disabled="!optionsSelected.keyF2Enable">
+          <label for="key2-name" class="form-label">快捷键2要使用的快捷键</label>
+          <input type="text" id="key2-name" class="form-control" placeholder="在这里按下要使用的快捷键" @keydown="getKeyName($event, 'key2Name')" v-model="optionsSelected.key2Name" readonly>
+        </div>
+        <div class="mb-3">
+          <label for="key-f2-function" class="form-label">快捷键2使用的接口</label>
+          <select id="key-f2-function" class="form-select" v-model="optionsSelected.key2Function" :disabled="!optionsSelected.key2Enable">
             <option v-for="(item, index) of hotKeyFunction" :key="index" v-bind:value="item.name">{{item.name}}</option>
           </select>
         </div>
@@ -148,8 +156,12 @@
         <div class="mb-3">
           <div class="form-check">
             <input class="form-check-input" type="checkbox" value="" id="specific-area" v-model="optionsSelected.specificArea">
-            <label class="form-check-label" for="specific-area">启用指定区域识别（快捷键F3）</label>
+            <label class="form-check-label" for="specific-area">启用指定区域识别</label>
           </div>
+        </div>
+        <div class="mb-3">
+          <label for="specific-areaKey-name" class="form-label">指定区域识别要使用的快捷键</label>
+          <input type="text" id="specific-areaKey-name" class="form-control" placeholder="在这里按下要使用的快捷键" @keydown="getKeyName($event, 'specificAreaKeyName')" v-model="optionsSelected.specificAreaKeyName" readonly>
         </div>
         <div class="mb-3">
           <label for="specific-area-left" class="form-label">识别区域左侧起始位置</label>
@@ -241,13 +253,16 @@ export default {
         ocrVoiceLibrarySelected: '',
         translationVoiceSpeed: 2,
         translationVoiceVolume: 10,
-        keyF1Enable: false,
-        keyF1Function: '百度云通用文字识别（标准版）',
-        keyF1Provider: 'baidu',
-        keyF2Enable: false,
-        keyF2Function: '腾讯云通用印刷体识别',
-        keyF2Provider: 'tencent',
+        key1Enable: false,
+        key1Name: 'F1',
+        key1Function: '百度云通用文字识别（标准版）',
+        key1Provider: 'baidu',
+        key2Enable: false,
+        key2Name: 'F2',
+        key2Function: '腾讯云通用印刷体识别',
+        key2Provider: 'tencent',
         specificArea: false,
+        specificAreaKeyName: 'F3',
         specificAreaLeft: 0,
         specificAreaTop: 0,
         specificAreaWidth: 300,
@@ -274,6 +289,18 @@ export default {
     }
   },
   methods: {
+    // 设置快捷键
+    async getKeyName(ev, keyIndex) {
+      if (ev.key !== 'Tab') ev.preventDefault();
+      let keysPressed = ev.key;
+      // 判断组合键
+      if (ev.shiftKey) keysPressed = `Shift+${keysPressed}`;
+      if (ev.ctrlKey) keysPressed = `Ctrl+${keysPressed}`;
+      if (ev.altKey) keysPressed = `Alt+${keysPressed}`;
+      if (ev.metaKey) keysPressed = `Meta+${keysPressed}`;
+      this.optionsSelected[keyIndex] = keysPressed;
+      return false;
+    },
     // 打开屏幕区域选择器
     async openSelector() {
       const result = await window.electronAPI.ipcRenderer.invoke('selector-window');
@@ -343,11 +370,26 @@ export default {
     },
     // 保存设置
     async saveOptions() {
+      // 检查快捷键是否有重复
+      const keyName = [this.optionsSelected.key1Name, this.optionsSelected.key2Name, this.optionsSelected.specificAreaKeyName];
+      if (new Set(keyName).size !== keyName.length) {
+        await window.electronAPI.ipcRenderer.invoke('dialog', {
+          name: 'showMessageBox',
+          options: {
+            title: '快捷键冲突',
+            message: '同一个快捷键不能使用多次，请检查快捷键设置！',
+            buttons: ['关闭'],
+            type: 'error',
+            noLink: true
+          }
+        });
+        return false;
+      }
       // 要保存的数据
       const submitData = this.optionsSelected;
       // 设置全局快捷键调用的提供商
-      submitData.keyF1Provider = this.hotKeyFunction.find(item => item.name === this.optionsSelected.keyF1Function).provider;
-      submitData.keyF2Provider = this.hotKeyFunction.find(item => item.name === this.optionsSelected.keyF2Function).provider;
+      submitData.key1Provider = this.hotKeyFunction.find(item => item.name === this.optionsSelected.key1Function).provider;
+      submitData.key2Provider = this.hotKeyFunction.find(item => item.name === this.optionsSelected.key2Function).provider;
       // 设置指定区域识别调用的提供商
       submitData.specificAreaProvider = this.hotKeyFunction.find(item => item.name === this.optionsSelected.specificAreaApi).provider;
       // 更新 Vuex 存储的选项
