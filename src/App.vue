@@ -42,6 +42,8 @@ export default {
     // 接收快捷键调用的 OCR 结果
     window.electronAPI.onResponse('ocrResult', (ev, args) => {
       if (args.result === 'success' && args.img !== undefined && args.list !== undefined) {
+        // 更改 vuex 存储的自动执行
+        this.$store.commit('changeAuto', args.auto);
         this.$store.commit('changeOcrResult', args);
         this.$router.push({
           name: 'ocrPage',

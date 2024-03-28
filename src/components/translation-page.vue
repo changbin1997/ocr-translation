@@ -303,9 +303,10 @@ export default {
       this.resultText = resultList.join("\n");
       this.translationResult = result.data;
       // 如果开启了翻译完成后自动朗读就朗读译文
-      if (this.$store.state.options.translationAutoVoice) {
+      if (this.$store.state.auto === '识别完成后自动翻译和朗读译文' || this.$store.state.options.translationAutoVoice) {
         this.startVoice(this.resultText, 'result');
       }
+      this.$store.commit('changeAuto', '');
     },
     // 清空
     clear() {
@@ -315,6 +316,7 @@ export default {
       this.translationResult = null;
       this.favorite = false;
       this.favoriteId = null;
+      this.$store.commit('changeAuto', '');
     },
     // 开始语音朗读
     startVoice(text, type) {
@@ -415,7 +417,7 @@ export default {
         // 清空 Vuex 中存储的需要翻译的内容
         this.$store.commit('changeTranslation', null);
         // 如果开启了自动翻译就提交翻译
-        if (this.$store.state.options.autoTranslation) {
+        if (this.$store.state.auto === '识别完成后自动翻译和朗读译文' || this.$store.state.options.autoTranslation) {
           this.submit();
         }
       }

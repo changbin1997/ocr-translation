@@ -132,6 +132,14 @@
             <option v-for="(item, index) of hotKeyFunction" :key="index" v-bind:value="item.name">{{item.name}}</option>
           </select>
         </div>
+        <div class="mb-3">
+          <label for="key1-auto" class="form-label">快捷键1自动操作</label>
+          <select id="key1-auto" class="form-select" :disabled="!optionsSelected.key1Enable" v-model="optionsSelected.key1Auto">
+            <option value="无">无</option>
+            <option value="识别完成后自动朗读识别文字">识别完成后自动朗读识别文字</option>
+            <option value="识别完成后自动翻译和朗读译文">识别完成后自动翻译和朗读译文</option>
+          </select>
+        </div>
         <!--快捷键2-->
         <div class="mb-3">
           <div class="form-check">
@@ -147,6 +155,14 @@
           <label for="key-f2-function" class="form-label">快捷键2使用的接口</label>
           <select id="key-f2-function" class="form-select" v-model="optionsSelected.key2Function" :disabled="!optionsSelected.key2Enable">
             <option v-for="(item, index) of hotKeyFunction" :key="index" v-bind:value="item.name">{{item.name}}</option>
+          </select>
+        </div>
+        <div class="mb-3">
+          <label for="key2-auto" class="form-label">快捷键2自动操作</label>
+          <select id="key2-auto" class="form-select" :disabled="!optionsSelected.key2Enable" v-model="optionsSelected.key2Auto">
+            <option value="无">无</option>
+            <option value="识别完成后自动朗读识别文字">识别完成后自动朗读识别文字</option>
+            <option value="识别完成后自动翻译和朗读译文">识别完成后自动翻译和朗读译文</option>
           </select>
         </div>
       </div>
@@ -188,8 +204,16 @@
             <option v-for="(item, index) of hotKeyFunction" :key="index" v-bind:value="item.name">{{item.name}}</option>
           </select>
         </div>
+        <div class="mb-3">
+          <label for="specific-area-auto" class="form-label">指定区域识别自动操作</label>
+          <select id="specific-area-auto" class="form-select" :disabled="!optionsSelected.specificArea" v-model="optionsSelected.specificAreaAuto">
+            <option value="无">无</option>
+            <option value="识别完成后自动朗读识别文字">识别完成后自动朗读识别文字</option>
+            <option value="识别完成后自动翻译和朗读译文">识别完成后自动翻译和朗读译文</option>
+          </select>
+        </div>
       </div>
-      <p class="mb-2"><b>自动执行</b></p>
+      <p class="mb-2"><b>自动执行（用于手动选择图片和翻译）</b></p>
       <div aria-label="自动执行" role="group">
         <div class="mb-3">
           <div class="form-check">
@@ -257,10 +281,12 @@ export default {
         key1Name: 'F1',
         key1Function: '百度云通用文字识别（标准版）',
         key1Provider: 'baidu',
+        key1Auto: '无',
         key2Enable: false,
         key2Name: 'F2',
         key2Function: '腾讯云通用印刷体识别',
         key2Provider: 'tencent',
+        key2Auto: '无',
         specificArea: false,
         specificAreaKeyName: 'F3',
         specificAreaLeft: 0,
@@ -269,6 +295,7 @@ export default {
         specificAreaHeight: 300,
         specificAreaApi: '腾讯云通用印刷体识别',
         specificAreaProvider: 'tencent',
+        specificAreaAuto: '无',
         ocrAutoVoice: false,
         translationAutoVoice: false,
         autoTranslation: false

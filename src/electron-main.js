@@ -112,6 +112,7 @@ app.on('ready', async () => {
         });
         return false;
       }
+      result.auto = options.options.key1Auto;
       mainWindow.webContents.send('ocrResult', result);
     });
   }
@@ -138,6 +139,7 @@ app.on('ready', async () => {
         });
         return false;
       }
+      result.auto = options.options.key2Auto;
       mainWindow.webContents.send('ocrResult', result);
     });
   }
@@ -167,6 +169,7 @@ app.on('ready', async () => {
         });
         return false;
       }
+      result.auto = options.options.specificAreaAuto;
       mainWindow.webContents.send('ocrResult', result);
     });
   }

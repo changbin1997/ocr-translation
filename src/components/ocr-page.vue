@@ -129,6 +129,8 @@ export default {
     },
     // 提交
     async submit(fileName) {
+      // 清除 vuex 存储的自动执行
+      this.$store.commit('changeAuto', '');
       // 是否是图片
       const isImage = await window.electronAPI.ipcRenderer.invoke('isImage', fileName);
       // 如果不是图片就返回
@@ -200,6 +202,7 @@ export default {
       this.imgOptions.show = false;
       this.showGuide = true;
       this.voice.stop();
+      this.$store.commit('changeAuto', '');
     },
     // 拷贝识别结果
     copyText() {
@@ -329,13 +332,12 @@ export default {
       this.ocrText = this.$store.state.ocrResult.list.join("\n");
       // 清空 Vuex 中存储的 OCR 结果
       this.$store.commit('changeOcrResult', null);
-      // 如果开启了自动朗读就朗读 OCR 文字
-      if (this.$store.state.options.ocrAutoVoice) {
+      // 自动执行
+      if (this.$store.state.auto === '识别完成后自动朗读识别文字') {
         this.startVoice();
-      }else if (this.$store.state.options.autoTranslation) {
-        // 如果开启了自动翻译就转到翻译页
-        this.toTranslationPage();
+        return false;
       }
+      if (this.$store.state.auto === '识别完成后自动翻译和朗读译文') this.toTranslationPage();
     },
     // 上下文菜单
     contextMenu(ev) {
