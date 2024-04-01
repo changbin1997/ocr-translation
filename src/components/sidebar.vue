@@ -39,7 +39,7 @@ export default {
 aside {
   width: 60px;
   height: 100%;
-  background: #FFFFFF;
+  background: #F9F9F9;
   border-right: 1px solid #EEEEEE;
   display: flex;
   flex: none;
@@ -59,10 +59,10 @@ aside .link-box a {
   transition: 0.3s;
 }
 aside .link-box a:focus {
-  color: #79BBFF;
+  color: #2780E3;
 }
 aside .link-box a:hover {
-  color: #79BBFF;
+  color: #2780E3;
 }
 aside .link-box a i {
   display: block;
@@ -73,6 +73,6 @@ aside .link-box a span {
 }
 /*侧边栏链接的选中状态*/
 .link-active {
-  color: #409EFF !important;
+  color: #2780E3 !important;
 }
 </style>

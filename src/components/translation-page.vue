@@ -1,6 +1,6 @@
 <template>
   <div id="translation-page">
-    <div role="toolbar" class="toolbar px-1 bg-light">
+    <div role="toolbar" class="toolbar px-1">
       <!--原文操作区域-->
       <div class="btn-group btn-box">
         <button type="button" title="清空原文和译文" class="btn" :disabled="originalText.length < 1 && resultText.length < 1" @click="clear">
@@ -47,10 +47,10 @@
     <!--输入和译文显示区域-->
     <div class="text-box">
       <div class="original-box">
-        <textarea @drop="dragFile" @dragover="preventDefault"  class="form-control border" placeholder="请输入要翻译的内容" aria-label="原文" v-model="originalText" @contextmenu="contextMenu"></textarea>
+        <textarea @drop="dragFile" @dragover="preventDefault"  class="form-control border-0" placeholder="请输入要翻译的内容" aria-label="原文" v-model="originalText" @contextmenu="contextMenu"></textarea>
       </div>
       <div class="result-box">
-        <textarea class="form-control border" aria-label="译文" v-model="resultText" aria-live="assertive" @contextmenu="contextMenu"></textarea>
+        <textarea class="form-control border-top-0 border-bottom-0 border-end-0" aria-label="译文" v-model="resultText" aria-live="assertive" @contextmenu="contextMenu"></textarea>
       </div>
     </div>
   </div>

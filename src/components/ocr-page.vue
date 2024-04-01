@@ -1,6 +1,6 @@
 <template>
   <div id="ocr-page">
-    <div role="toolbar" class="toolbar px-1 bg-light">
+    <div role="toolbar" class="toolbar px-1">
       <div class="btn-group btn-box">
         <button type="button" title="清除图片和识别结果" class="btn" @click="clear" :disabled="ocrText < 1">
           <i class="icon-cross me-1"></i>
@@ -38,11 +38,11 @@
         <img v-bind:src="imgOptions.url" alt="用于识别的图片" v-if="imgOptions.show">
         <div class="guide text-center" v-if="showGuide">
           <h2>点击此处选择图片识别</h2>
-          <p>也可以把图片拖到此处或按 F1 选择屏幕区域识别</p>
+          <p>也可以使用快捷键选择屏幕区域识别</p>
         </div>
       </div>
       <div class="ocr-text-box">
-        <textarea class="form-control border" v-model="ocrText" aria-label="OCR识别结果" placeholder="此处会显示 OCR 识别结果" @contextmenu="contextMenu" aria-live="assertive"></textarea>
+        <textarea class="form-control border border-0" v-model="ocrText" aria-label="OCR识别结果" placeholder="此处会显示 OCR 识别结果" @contextmenu="contextMenu" aria-live="assertive"></textarea>
       </div>
     </div>
   </div>

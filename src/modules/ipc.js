@@ -1,4 +1,4 @@
-const {dialog, ipcMain, BrowserWindow, clipboard, shell} = require('electron');
+const {dialog, ipcMain, BrowserWindow, clipboard, shell, app} = require('electron');
 const Ocr = require('./Ocr');  // OCR 模块
 const BaiduTranslation = require('./BaiduTranslation');  // 百度翻译模块
 const Data = require('./Data');  // 数据库操作模块
@@ -8,6 +8,12 @@ const selectorWindow = require('./selector-window');
 // 打开屏幕区域选择窗口
 ipcMain.handle('selector-window',  async () => {
   return await selectorWindow();
+});
+
+// 重启程序
+ipcMain.handle('restart', () => {
+  app.relaunch();
+  app.exit();
 });
 
 // 显示对话框

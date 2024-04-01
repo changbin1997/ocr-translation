@@ -124,7 +124,7 @@
         </div>
         <div class="mb-3">
           <label for="key1-name" class="form-label">快捷键1要使用的快捷键</label>
-          <input type="text" id="key1-name" class="form-control" placeholder="在这里按下要使用的快捷键" @keydown="getKeyName($event, 'key1Name')" v-model="optionsSelected.key1Name" readonly>
+          <input type="text" id="key1-name" class="form-control" placeholder="在这里按下要使用的快捷键" @keydown="getKeyName($event, 'key1Name')" v-model="optionsSelected.key1Name" readonly :disabled="!optionsSelected.key1Enable">
         </div>
         <div class="mb-3">
           <label for="key-f1-function" class="form-label">快捷键1使用的接口</label>
@@ -149,7 +149,7 @@
         </div>
         <div class="mb-3">
           <label for="key2-name" class="form-label">快捷键2要使用的快捷键</label>
-          <input type="text" id="key2-name" class="form-control" placeholder="在这里按下要使用的快捷键" @keydown="getKeyName($event, 'key2Name')" v-model="optionsSelected.key2Name" readonly>
+          <input type="text" id="key2-name" class="form-control" placeholder="在这里按下要使用的快捷键" @keydown="getKeyName($event, 'key2Name')" v-model="optionsSelected.key2Name" readonly :disabled="!optionsSelected.key2Enable">
         </div>
         <div class="mb-3">
           <label for="key-f2-function" class="form-label">快捷键2使用的接口</label>
@@ -177,7 +177,7 @@
         </div>
         <div class="mb-3">
           <label for="specific-areaKey-name" class="form-label">指定区域识别要使用的快捷键</label>
-          <input type="text" id="specific-areaKey-name" class="form-control" placeholder="在这里按下要使用的快捷键" @keydown="getKeyName($event, 'specificAreaKeyName')" v-model="optionsSelected.specificAreaKeyName" readonly>
+          <input type="text" id="specific-areaKey-name" class="form-control" placeholder="在这里按下要使用的快捷键" @keydown="getKeyName($event, 'specificAreaKeyName')" v-model="optionsSelected.specificAreaKeyName" readonly :disabled="!optionsSelected.specificArea">
         </div>
         <div class="mb-3">
           <label for="specific-area-left" class="form-label">识别区域左侧起始位置</label>
@@ -196,7 +196,8 @@
           <input type="number" id="specific-area-height" class="form-control" placeholder="识别区域高度（px）" v-model="optionsSelected.specificAreaHeight" :disabled="!optionsSelected.specificArea">
         </div>
         <div class="mb-3">
-          <button type="button" class="btn btn-outline-primary" @click="openSelector">使用屏幕区域选择器选择识别区域</button>
+          <button type="button" class="btn btn-outline-primary me-2" @click="openSelector" :disabled="!optionsSelected.specificArea">使用屏幕区域选择器选择识别区域</button>
+          <span>屏幕区域选择器可以通过鼠标框选区域来获取屏幕位置</span>
         </div>
         <div class="mb-3">
           <label for="specific-area-api" class="form-label">指定区域识别使用的接口</label>
@@ -441,16 +442,20 @@ export default {
         });
         return false;
       }
-      await window.electronAPI.ipcRenderer.invoke('dialog', {
+      const restart = await window.electronAPI.ipcRenderer.invoke('dialog', {
         name: 'showMessageBox',
         options: {
           title: '已成功保存',
-          message: `您更改的 ${result.count} 个选项已成功保存，如果更改了全局快捷键设置，需要重启软件才会生效。`,
-          buttons: ['关闭'],
+          message: `有 ${result.count} 个选项已成功保存，快捷键相关的设置需要重启程序才会生效，您需要现在重启程序吗？`,
+          buttons: ['确认重启', '取消'],
           type: 'info',
           noLink: true
         }
       });
+      // 重启程序
+      if (restart.response === 0) {
+        await window.electronAPI.ipcRenderer.invoke('restart');
+      }
     }
   },
   created() {
