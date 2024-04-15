@@ -186,6 +186,13 @@ app.on('ready', async () => {
       }
     },
     {
+      label: '设置',
+      click: () => {
+        mainWindow.webContents.send('toPage', 'optionsPage');
+        if (!mainWindow.isVisible()) mainWindow.show();
+      }
+    },
+    {
       label: '退出',
       role: 'quit'
     }

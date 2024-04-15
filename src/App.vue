@@ -54,6 +54,10 @@ export default {
         });
       }
     });
+    // 跳转到指定页面
+    window.electronAPI.onResponse('toPage', (ev, args) => {
+      this.$router.push({name: args});
+    })
   }
 }
 </script>
