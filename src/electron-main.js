@@ -1,4 +1,4 @@
-const { app, BrowserWindow, globalShortcut, dialog, Menu, Tray } = require('electron');
+const { app, BrowserWindow, globalShortcut, dialog, Menu, Tray, clipboard } = require('electron');
 const path = require('path');
 const ScreenshotOcr = require('./modules/screenshotOcr'); // 截图模块
 const Data = require('./modules/Data'); // 数据库操作模块
@@ -116,6 +116,7 @@ app.on('ready', async () => {
       mainWindow.webContents.send('ocrResult', result);
     });
   }
+
   // 如果开启了全局快捷键2
   if (options.options.key2Enable) {
     // 快捷键2事件
@@ -143,6 +144,7 @@ app.on('ready', async () => {
       mainWindow.webContents.send('ocrResult', result);
     });
   }
+
   // 如果开启了指定区域识别
   if (options.options.specificArea) {
     globalShortcut.register(options.options.specificAreaKeyName, async () => {
@@ -171,6 +173,17 @@ app.on('ready', async () => {
       }
       result.auto = options.options.specificAreaAuto;
       mainWindow.webContents.send('ocrResult', result);
+    });
+  }
+
+  // 如果开启了剪贴板翻译
+  if (options.options.clipboardTranslation) {
+    globalShortcut.register(options.options.clipboardTranslationKeyName, () => {
+      // 读取剪贴板的文字
+      const clipboardText = clipboard.readText();
+      if (clipboardText === '') return false;
+      // 把剪贴板的内容传给渲染进程的 app 组件
+      mainWindow.webContents.send('clipboardTranslation', clipboardText);
     });
   }
 

@@ -170,6 +170,7 @@ module.exports = class Data {
         options.translationAutoVoice = Boolean(Number(options.translationAutoVoice));
         options.autoTranslation = Boolean(Number(options.autoTranslation));
         options.specificArea = Boolean(Number(options.specificArea));
+        options.clipboardTranslation = Boolean(Number(options.clipboardTranslation));
         // 把 Number 类型的值转为 Number
         options.ocrVoiceSpeed = Number(options.ocrVoiceSpeed);
         options.ocrVoiceVolume = Number(options.ocrVoiceVolume);
@@ -280,7 +281,9 @@ module.exports = class Data {
       specificAreaAuto: '无',
       ocrAutoVoice: false,
       translationAutoVoice: false,
-      autoTranslation: false
+      autoTranslation: false,
+      clipboardTranslation: false,
+      clipboardTranslationKeyName: 'F4'
     };
 
     // 获取选项的名称

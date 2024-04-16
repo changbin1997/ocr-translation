@@ -167,6 +167,7 @@
         </div>
       </div>
       <div class="mb-4"></div>
+      <!--指定区域识别-->
       <p class="mb-2"><b>指定区域识别</b></p>
       <div aria-label="指定区域识别" role="group">
         <div class="mb-3">
@@ -236,6 +237,21 @@
         </div>
       </div>
       <div class="mb-4"></div>
+      <!--剪贴板翻译-->
+      <p class="mb-2"><b>自动翻译剪贴板的文字</b></p>
+      <div aria-label="自动翻译剪贴板的文字" role="group">
+        <div class="mb-3">
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" value="" id="clipboard-translation" v-model="optionsSelected.clipboardTranslation">
+            <label class="form-check-label" for="clipboard-translation">启用剪贴板翻译</label>
+          </div>
+        </div>
+        <div class="mb-3">
+          <label for="clipboard-translation-key-name" class="form-label">翻译剪贴板要使用的快捷键</label>
+          <input type="text" id="clipboard-translation-key-name" class="form-control" placeholder="在这里按下要使用的快捷键" @keydown="getKeyName($event, 'clipboardTranslationKeyName')" v-model="optionsSelected.clipboardTranslationKeyName" readonly :disabled="!optionsSelected.clipboardTranslation">
+        </div>
+      </div>
+      <div class="mb-4"></div>
       <div>
         <button type="button" class="btn btn-primary" @click="saveOptions" :disabled="disabledSaveBtn">保存设置</button>
       </div>
@@ -299,7 +315,9 @@ export default {
         specificAreaAuto: '无',
         ocrAutoVoice: false,
         translationAutoVoice: false,
-        autoTranslation: false
+        autoTranslation: false,
+        clipboardTranslation: false,
+        clipboardTranslationKeyName: 'F4'
       },
       voiceLibraryList: [],
       hotKeyFunction: [

@@ -306,6 +306,7 @@ export default {
       if (this.$store.state.auto === '识别完成后自动翻译和朗读译文' || this.$store.state.options.translationAutoVoice) {
         this.startVoice(this.resultText, 'result');
       }
+      // 清除自动执行
       this.$store.commit('changeAuto', '');
     },
     // 清空
@@ -443,6 +444,17 @@ export default {
     this.apiInit();
     // 检查自动翻译
     this.autoTranslation();
+  },
+  watch: {
+    // 监听路由参数变化
+    $route(to, from) {
+      if (to.path === from.path && to.name === from.name) {
+        if (to.query !== from.query) {
+          // 检查自动翻译
+          this.autoTranslation();
+        }
+      }
+    }
   }
 }
 </script>

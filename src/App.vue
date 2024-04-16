@@ -57,7 +57,19 @@ export default {
     // 跳转到指定页面
     window.electronAPI.onResponse('toPage', (ev, args) => {
       this.$router.push({name: args});
-    })
+    });
+    // 剪贴板翻译
+    window.electronAPI.onResponse('clipboardTranslation', (ev, args) => {
+      // 设置翻译内容
+      this.$store.commit('changeTranslation', args);
+      // 设置翻译的自动执行
+      this.$store.commit('changeAuto', '识别完成后自动翻译和朗读译文');
+      // 转到翻译页
+      this.$router.push({
+        name: 'translationPage',
+        query: {ocrTranslation: args.length}
+      });
+    });
   }
 }
 </script>
