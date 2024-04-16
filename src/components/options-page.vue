@@ -16,6 +16,12 @@
           <label for="baidu-secret-key" class="form-label">Secret Key</label>
           <input type="text" id="baidu-secret-key" class="form-control" placeholder="百度 OCR 的 Secret Key" v-model="optionsSelected.baiduOcrSecretKey">
         </div>
+        <div class="mb-3">
+          <label for="baidu-ocr-language-selected" class="form-label">百度 OCR 默认识别的语言</label>
+          <select id="baidu-ocr-language-selected" class="form-select" v-model="optionsSelected.baiduOcrLanguageSelected">
+            <option v-for="(item, index) of baiduOcrLanguageList" :key="index" v-bind:value="item.code">{{item.name}}</option>
+          </select>
+        </div>
       </div>
       <div class="mb-4"></div>
       <!--腾讯 OCR 接口-->
@@ -32,6 +38,12 @@
         <div class="mb-3">
           <label for="tencent-secret-key" class="form-label">Secret Key</label>
           <input type="text" id="tencent-secret-key" class="form-control" placeholder="腾讯 OCR 的 Secret Key" v-model="optionsSelected.tencentOcrSecretKey">
+        </div>
+        <div class="mb-3">
+          <label for="tencent-ocr-language-selected" class="form-label">腾讯 OCR 默认识别的语言</label>
+          <select id="tencent-ocr-language-selected" class="form-select" v-model="optionsSelected.tencentOcrLanguageSelected">
+            <option v-for="(item, index) of tencentOcrLanguageList" :key="index" v-bind:value="item.code">{{item.name}}</option>
+          </select>
         </div>
       </div>
       <div class="mb-4"></div>
@@ -52,6 +64,7 @@
         </div>
       </div>
       <div class="mb-4"></div>
+      <!--有道 OCR 接口-->
       <p class="mb-2"><b>有道智云 OCR 接口</b></p>
       <div aria-label="有道智云 OCR 接口" role="group">
         <div class="mb-3">
@@ -61,6 +74,12 @@
         <div class="mb-3">
           <label for="youdao-app-key" class="form-label">App 密钥</label>
           <input type="text" id="youdao-app-key" class="form-control" placeholder="有道智云 OCR 的密钥" v-model="optionsSelected.youdaoOcrAppKey">
+        </div>
+        <div class="mb-3">
+          <label for="youdao-ocr-language-selected" class="form-label">有道 OCR 默认识别的语言</label>
+          <select id="youdao-ocr-language-selected" class="form-select" v-model="optionsSelected.youdaoOcrLanguageSelected">
+            <option v-for="(item, index) of youdaoOcrLanguageList" :key="index" v-bind:value="item.code">{{item.name}}</option>
+          </select>
         </div>
       </div>
       <div class="mb-4"></div>
@@ -270,6 +289,7 @@
 
 <script>
 import Voice from './../modules/voice';
+import ocrLanguageList from './../modules/ocr-language-list';
 
 export default {
   name: 'options-page',
@@ -278,15 +298,18 @@ export default {
       optionsSelected: {
         youdaoOcrAppID: '',
         youdaoOcrAppKey: '',
+        youdaoOcrLanguageSelected: 'auto',
         xunfeiOcrAPPId: '',
         xunfeiOcrAPISecret: '',
         xunfeiOcrAPIKey: '',
         baiduOcrAppID: '',
         baiduOcrApiKey : '',
         baiduOcrSecretKey: '',
+        baiduOcrLanguageSelected: 'CHN_ENG',
         tencentOcrAppID: '',
         tencentOcrSecretID: '',
         tencentOcrSecretKey: '',
+        tencentOcrLanguageSelected: 'zh_rare',
         baiduTranslationAppID: '',
         baiduTranslationApiKey: '',
         ocrVoiceSpeed: 2,
@@ -331,7 +354,10 @@ export default {
         {provider: 'youdao', name: '有道智云通用文字识别'}
       ],
       synth: null,
-      disabledSaveBtn: false
+      disabledSaveBtn: false,
+      baiduOcrLanguageList: ocrLanguageList.baidu,
+      tencentOcrLanguageList: ocrLanguageList.tencent,
+      youdaoOcrLanguageList: ocrLanguageList.youdao
     }
   },
   methods: {

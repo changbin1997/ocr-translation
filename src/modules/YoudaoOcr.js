@@ -12,9 +12,9 @@ module.exports = class YoudaoOcr {
   }
 
   // 提交识别
-  submit(base64Img) {
+  submit(base64Img, langType = 'auto') {
     // 获取要提交的数据
-    const queryData = this.submitData(base64Img);
+    const queryData = this.submitData(base64Img, langType);
 
     return new Promise(resolve => {
       axios({
@@ -53,12 +53,12 @@ module.exports = class YoudaoOcr {
   }
 
   // 生成签名
-  submitData(base64Img) {
+  submitData(base64Img, langType) {
     const data = {
       // 生成 UUID
       salt: crypto.randomUUID(),
       // 语言
-      langType: 'auto',
+      langType: langType,
       // 按行识别：10012
       detectType: '10012',
       imageType: '1',

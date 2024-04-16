@@ -27,9 +27,13 @@ module.exports = class Ocr {
       let result = null;
       if (type === '百度云通用文字识别（标准版）') {
         // 通用文字识别
-        result = client.generalBasic(base64File);
+        result = client.generalBasic(base64File, {
+          language_type: this.options.baiduOcrLanguageSelected
+        });
       } else if (type === '百度云通用文字识别（高精度版）') {
-        result = client.accurateBasic(base64File);
+        result = client.accurateBasic(base64File, {
+          language_type: this.options.baiduOcrLanguageSelected
+        });
       }else {
         resolve({result: 'error', msg: '不支持的 API 接口！'});
         return false;
@@ -87,16 +91,28 @@ module.exports = class Ocr {
       // 根据传入的识别类型调用识别
       switch (type) {
         case '腾讯云通用印刷体识别':
-          result = client.GeneralBasicOCR({ImageBase64: base64File});
+          result = client.GeneralBasicOCR({
+            ImageBase64: base64File,
+            LanguageType: this.options.tencentOcrLanguageSelected
+          });
           break;
         case '腾讯云通用印刷体识别（高精度版）':
-          result = client.GeneralAccurateOCR({ImageBase64: base64File});
+          result = client.GeneralAccurateOCR({
+            ImageBase64: base64File,
+            LanguageType: this.options.tencentOcrLanguageSelected
+          });
           break;
         case '腾讯云通用手写体识别':
-          result = client.GeneralHandwritingOCR({ImageBase64: base64File});
+          result = client.GeneralHandwritingOCR({
+            ImageBase64: base64File,
+            LanguageType: this.options.tencentOcrLanguageSelected
+          });
           break;
         case '腾讯云广告文字识别':
-          result = client.AdvertiseOCR({ImageBase64: base64File});
+          result = client.AdvertiseOCR({
+            ImageBase64: base64File,
+            LanguageType: this.options.tencentOcrLanguageSelected
+          });
           break;
         default:
           resolve({result: 'error', msg: '不支持的 API 接口！'});
@@ -132,7 +148,7 @@ module.exports = class Ocr {
   // 有道智云OCR
   async youdao(type, base64File) {
     const youdaoOcr = new YoudaoOcr(this.options.youdaoOcrAppID, this.options.youdaoOcrAppKey);
-    const result = await youdaoOcr.submit(base64File);
+    const result = await youdaoOcr.submit(base64File, this.options.youdaoOcrLanguageSelected);
     // 如果成功就添加 OCR 历史记录
     if (result.msg === undefined && result.code === undefined) {
       await this.data.addOcrHistory('youdao', type);
