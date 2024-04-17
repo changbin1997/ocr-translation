@@ -256,6 +256,7 @@ module.exports = class Data {
       tencentOcrSecretID: '',
       tencentOcrSecretKey: '',
       tencentOcrLanguageSelected: 'zh_rare',
+      tencentOcrRegionSelected: 'ap-shanghai',
       baiduTranslationAppID: '',
       baiduTranslationApiKey: '',
       ocrVoiceSpeed: 2,

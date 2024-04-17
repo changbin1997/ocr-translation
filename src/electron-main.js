@@ -26,15 +26,6 @@ app.on('ready', async () => {
     Menu.setApplicationMenu(null);
   }
 
-  // 加载页面文件
-  if (app.isPackaged) {
-    // 如果是打包好的就加载打包的 HTML 文件
-    mainWindow.loadFile('dist/index.html');
-  } else {
-    // 如果没有打包就直接从本地服务器加载
-    mainWindow.loadURL('http://localhost:9999/');
-  }
-
   // 关闭事件
   mainWindow.on('closed', () => {
     globalShortcut.unregisterAll();
@@ -48,6 +39,15 @@ app.on('ready', async () => {
 
   // 初始化数据库
   await myApp.dataInit(mainWindow);
+
+  // 加载页面文件
+  if (app.isPackaged) {
+    // 如果是打包好的就加载打包的 HTML 文件
+    mainWindow.loadFile('dist/index.html');
+  } else {
+    // 如果没有打包就直接从本地服务器加载
+    mainWindow.loadURL('http://localhost:9999/');
+  }
 
   // 全局快捷键
   await myApp.globalShortcut(mainWindow);

@@ -45,6 +45,12 @@
             <option v-for="(item, index) of tencentOcrLanguageList" :key="index" v-bind:value="item.code">{{item.name}}</option>
           </select>
         </div>
+        <div class="mb-3">
+          <label for="tencent-ocr-language-selected" class="form-label">腾讯 OCR 服务器地域</label>
+          <select id="tencent-ocr-language-selected" class="form-select" v-model="optionsSelected.tencentOcrRegionSelected">
+            <option v-for="(item, index) of tencentOcrRegionList" :key="index" v-bind:value="item.code">{{item.name}}</option>
+          </select>
+        </div>
       </div>
       <div class="mb-4"></div>
       <!--讯飞 OCR 接口-->
@@ -310,6 +316,7 @@ export default {
         tencentOcrSecretID: '',
         tencentOcrSecretKey: '',
         tencentOcrLanguageSelected: 'zh_rare',
+        tencentOcrRegionSelected: 'ap-shanghai',
         baiduTranslationAppID: '',
         baiduTranslationApiKey: '',
         ocrVoiceSpeed: 2,
@@ -357,7 +364,14 @@ export default {
       disabledSaveBtn: false,
       baiduOcrLanguageList: ocrLanguageList.baidu,
       tencentOcrLanguageList: ocrLanguageList.tencent,
-      youdaoOcrLanguageList: ocrLanguageList.youdao
+      youdaoOcrLanguageList: ocrLanguageList.youdao,
+      tencentOcrRegionList: [
+        {code: 'ap-beijing', name: '亚洲-北京'},
+        {code: 'ap-shanghai', name: '亚洲-上海'},
+        {code: 'ap-guangzhou', name: '亚洲-广州'},
+        {code: 'ap-hongkong', name: '亚洲-香港'},
+        {code: 'na-toronto', name: '北美-多伦多'}
+      ]
     }
   },
   methods: {

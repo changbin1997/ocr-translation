@@ -77,7 +77,7 @@ module.exports = class Ocr {
         secretId: this.options.tencentOcrSecretID,
         secretKey: this.options.tencentOcrSecretKey
       },
-      region: 'ap-guangzhou',
+      region: this.options.tencentOcrRegionSelected,
       profile: {
         httpProfile: {
           reqTimeout: 15000
