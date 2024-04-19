@@ -62,6 +62,8 @@ export default {
         {provider: 'tencent', name: '腾讯云通用印刷体识别（高精度版）'},
         {provider: 'tencent', name: '腾讯云通用手写体识别'},
         {provider: 'tencent', name: '腾讯云广告文字识别'},
+        {provider: 'tencent', name: '腾讯云通用印刷体识别（精简版）'},
+        {provider: 'tencent', name: '腾讯云通用印刷体识别（高速版）'},
         {provider: 'xunfei', name: '科大讯飞通用文字识别'},
         {provider: 'youdao', name: '有道智云通用文字识别'}
       ],

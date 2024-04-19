@@ -97,22 +97,19 @@ module.exports = class Ocr {
           });
           break;
         case '腾讯云通用印刷体识别（高精度版）':
-          result = client.GeneralAccurateOCR({
-            ImageBase64: base64File,
-            LanguageType: this.options.tencentOcrLanguageSelected
-          });
+          result = client.GeneralAccurateOCR({ImageBase64: base64File});
           break;
         case '腾讯云通用手写体识别':
-          result = client.GeneralHandwritingOCR({
-            ImageBase64: base64File,
-            LanguageType: this.options.tencentOcrLanguageSelected
-          });
+          result = client.GeneralHandwritingOCR({ImageBase64: base64File});
           break;
         case '腾讯云广告文字识别':
-          result = client.AdvertiseOCR({
-            ImageBase64: base64File,
-            LanguageType: this.options.tencentOcrLanguageSelected
-          });
+          result = client.AdvertiseOCR({ImageBase64: base64File});
+          break;
+        case '腾讯云通用印刷体识别（精简版）':
+          result = client.GeneralEfficientOCR({ImageBase64: base64File});
+          break;
+        case '腾讯云通用印刷体识别（高速版）':
+          result = client.GeneralFastOCR({ImageBase64: base64File});
           break;
         default:
           resolve({result: 'error', msg: '不支持的 API 接口！'});

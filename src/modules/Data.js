@@ -536,6 +536,22 @@ module.exports = class Data {
         WHERE name = ? AND ocr_time > ?
         `,
         values: ['腾讯云广告文字识别', monthFirstDay]
+      },
+      {
+        name: '本月腾讯云通用印刷体识别（精简版）使用量',
+        sql: `
+        SELECT COUNT(*) FROM ocr_history
+        WHERE name = ? AND ocr_time > ?
+        `,
+        values: ['腾讯云通用印刷体识别（精简版）', monthFirstDay]
+      },
+      {
+        name: '本月腾讯云通用印刷体识别（高速版）使用量',
+        sql: `
+        SELECT COUNT(*) FROM ocr_history
+        WHERE name = ? AND ocr_time > ?
+        `,
+        values: ['腾讯云通用印刷体识别（高速版）', monthFirstDay]
       }
     ];
 

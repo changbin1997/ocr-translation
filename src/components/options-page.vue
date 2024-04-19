@@ -44,10 +44,11 @@
           <select id="tencent-ocr-language-selected" class="form-select" v-model="optionsSelected.tencentOcrLanguageSelected">
             <option v-for="(item, index) of tencentOcrLanguageList" :key="index" v-bind:value="item.code">{{item.name}}</option>
           </select>
+          <p class="mt-3">注意，只有普通的腾讯云通用印刷体识别支持手动设置语言，其它的腾讯识别接口设置语言无效！</p>
         </div>
         <div class="mb-3">
-          <label for="tencent-ocr-language-selected" class="form-label">腾讯 OCR 服务器地域</label>
-          <select id="tencent-ocr-language-selected" class="form-select" v-model="optionsSelected.tencentOcrRegionSelected">
+          <label for="tencent-ocr-region-selected" class="form-label">腾讯 OCR 服务器地域</label>
+          <select id="tencent-ocr-region-selected" class="form-select" v-model="optionsSelected.tencentOcrRegionSelected">
             <option v-for="(item, index) of tencentOcrRegionList" :key="index" v-bind:value="item.code">{{item.name}}</option>
           </select>
         </div>
@@ -357,6 +358,8 @@ export default {
         {provider: 'tencent', name: '腾讯云通用印刷体识别（高精度版）'},
         {provider: 'tencent', name: '腾讯云通用手写体识别'},
         {provider: 'tencent', name: '腾讯云广告文字识别'},
+        {provider: 'tencent', name: '腾讯云通用印刷体识别（精简版）'},
+        {provider: 'tencent', name: '腾讯云通用印刷体识别（高速版）'},
         {provider: 'xunfei', name: '科大讯飞通用文字识别'},
         {provider: 'youdao', name: '有道智云通用文字识别'}
       ],
