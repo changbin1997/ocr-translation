@@ -22,20 +22,10 @@ export default class Voice {
       voiceLibraryList = this.synth.getVoices();
       if (this.voiceLibraryName !== '') {
         // 找出设置的语音库
-        for (let i = 0;i < voiceLibraryList.length;i ++) {
-          if (voiceLibraryList[i].name === this.voiceLibraryName) {
-            this.voiceLibrary = voiceLibraryList[i];
-            break;
-          }
-        }
+        this.voiceLibrary = voiceLibraryList.find(item => item.name === this.voiceLibraryName);
       }else {
         // 找出中文语音库
-        for (let i = 0;i < voiceLibraryList.length;i ++) {
-          if (voiceLibraryList[i].lang === 'zh-CN' || voiceLibraryList[i].lang === 'zh-TW') {
-            this.voiceLibrary = voiceLibraryList[i];
-            break;
-          }
-        }
+        this.voiceLibrary = voiceLibraryList.find(item => item.name === 'zh-CN' || item.name === 'zh-TW');
       }
     }, 200);
     this.utterThis = new SpeechSynthesisUtterance();
@@ -46,13 +36,10 @@ export default class Voice {
     let exist = false;  // 如果找到指定语言的语音库就为 true
     const re = new RegExp(language, 'i');  // 匹配语音库的正则表达式
     const voiceLibraryList = this.synth.getVoices();  // 获取语音库列表
-    for (let i = 0;i < voiceLibraryList.length;i ++) {
-      if (re.test(voiceLibraryList[i].lang)) {
-        this.voiceLibrary = voiceLibraryList[i];
-        this.voiceLibraryName = voiceLibraryList[i].name;
-        exist = true;
-        break;
-      }
+    this.voiceLibrary = voiceLibraryList.find(item => re.test(item.lang));
+    if (this.voiceLibrary !== undefined) {
+      this.voiceLibraryName = this.voiceLibrary.name;
+      exist = true;
     }
     return exist;
   }
@@ -61,6 +48,13 @@ export default class Voice {
   start(options) {
     // 设置合成的文本内容
     this.utterThis.text = options.text;
+    // 是否有合适的语音库
+    if (this.voiceLibrary === undefined || this.voiceLibrary === null) {
+      if (typeof options.error === "function") {
+        options.error('您的电脑上没有合适的语音库！');
+      }
+      return false;
+    }
     // 设置语音库
     this.utterThis.voice = this.voiceLibrary;
     // 设置音量

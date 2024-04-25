@@ -77,7 +77,7 @@ module.exports = class XunfeiOcr {
         const textList = [];
         // 获取每一行的文字
         text.pages[0].lines.forEach(val => {
-          if (val.words[0].content !== undefined) textList.push(val.words[0].content);
+          if (val.words?.[0].content !== undefined) textList.push(val.words[0].content);
         });
         resolve({result: 'success', list: textList});
       }).catch(error => {

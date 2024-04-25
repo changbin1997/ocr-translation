@@ -449,12 +449,8 @@ export default {
         // 如果已经设置了语音库就返回，否则就找出一个中文语音库作为默认选中的语音库
         if (this.optionsSelected.ocrVoiceLibrarySelected !== '') return false;
         // 找出一个中文语音库作为默认选中的语音库
-        for (let i = 0;i < this.voiceLibraryList.length;i ++) {
-          if (this.optionsSelected.ocrVoiceLibrarySelected === '' && this.voiceLibraryList[i].lang === 'zh-CN') {
-            this.optionsSelected.ocrVoiceLibrarySelected = this.voiceLibraryList[i].name;
-            break;
-          }
-        }
+        const voiceLibrary = this.voiceLibraryList.find(item => item.lang === 'zh-CN');
+        if (voiceLibrary !== undefined && voiceLibrary !== null) this.optionsSelected.ocrVoiceLibrarySelected = voiceLibrary;
       }, 30);
     },
     // 保存设置

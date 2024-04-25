@@ -102,7 +102,11 @@ module.exports = class MyApp {
     if (this.options.options.key1Enable) {
       // 快捷键1事件
       globalShortcut.register(this.options.options.key1Name, async () => {
-        if (disabled) return false;
+        if (disabled) {
+          // 播放提示音
+          shell.beep();
+          return false;
+        }
         disabled = true; // 正在识别时禁用截图
         const result = await screenshotOcr.ocr(
           this.options.options.key1Provider,
@@ -130,7 +134,11 @@ module.exports = class MyApp {
     if (this.options.options.key2Enable) {
       // 快捷键2事件
       globalShortcut.register(this.options.options.key2Name, async () => {
-        if (disabled) return false;
+        if (disabled) {
+          // 播放提示音
+          shell.beep();
+          return false;
+        }
         disabled = true; // 正在识别时禁用截图
         const result = await screenshotOcr.ocr(
           this.options.options.key2Provider,
@@ -157,7 +165,11 @@ module.exports = class MyApp {
     // 如果开启了指定区域识别
     if (this.options.options.specificArea) {
       globalShortcut.register(this.options.options.specificAreaKeyName, async () => {
-        if (disabled) return false;
+        if (disabled) {
+          // 播放提示音
+          shell.beep();
+          return false;
+        }
         disabled = true; // 正在识别时禁用截图
         // 调用截取指定区域识别
         const result = await screenshotOcr.specificArea(
