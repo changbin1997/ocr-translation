@@ -51,7 +51,7 @@ module.exports = class Data {
     if (count < 1) return {result: 'success', list: [], count: 0};
 
     const sql = `
-    SELECT id, language1 AS 'from', language2 AS 'to', src, dst, created FROM favorites
+    SELECT id, language1 AS 'from', language2 AS 'to', src, dst, created, provider FROM favorites
     ORDER BY created DESC
     LIMIT ?, ?
     `;
@@ -87,12 +87,12 @@ module.exports = class Data {
 
     const sql = `
     INSERT INTO favorites
-    (language1, language2, src, dst, created)
+    (language1, language2, src, dst, created, provider)
     VALUES
-    (?, ?, ?, ?, ?)
+    (?, ?, ?, ?, ?, ?)
     `;
     // 用于替换 SQL 占位符的数据
-    const value = [result.from, result.to, src.join('\n'), dst.join('\n'), timestamp];
+    const value = [result.from, result.to, src.join('\n'), dst.join('\n'), timestamp, result.provider];
 
     return new Promise(resolve => {
       this.db.run(sql, value, function (err) {
@@ -259,6 +259,7 @@ module.exports = class Data {
       tencentOcrRegionSelected: 'ap-shanghai',
       baiduTranslationAppID: '',
       baiduTranslationApiKey: '',
+      translationProvider: 'baidu',
       ocrVoiceSpeed: 2,
       ocrVoiceVolume: 10,
       ocrVoiceLibrarySelected: '',
@@ -385,7 +386,8 @@ module.exports = class Data {
     language2 VARCHAR (10) NOT NULL,
     src VARCHAR NOT NULL,
     dst VARCHAR NOT NULL,
-    created INTEGER NOT NULL DEFAULT 0
+    created INTEGER NOT NULL DEFAULT 0,
+    provider VARCHAR (30) NOT NULL
     )
     `;
     return new Promise(resolve => {
@@ -755,9 +757,10 @@ module.exports = class Data {
   }
 
   // 清空翻译历史记录
-  deleteAllTranslationHistory() {
+  deleteAllTranslationHistory(provider) {
+    const sql = 'DELETE FROM translation_history WHERE provider = ?';
     return new Promise(resolve => {
-      this.db.run('DELETE FROM translation_history', function (err) {
+      this.db.run(sql, [provider], function (err) {
         if (err) {
           resolve({ result: 'error', msg: err.message });
         } else {
@@ -811,35 +814,52 @@ module.exports = class Data {
     });
   }
 
-  // 获取翻译历史记录总览数据
-  getTranslationHistoryOverview() {
-    const dataList = [];
-    return new Promise(resolve => {
-      // 查询出翻译总字数
-      this.db.get('SELECT SUM(word_count) AS count FROM translation_history', (err, row) => {
-        dataList.push({
-          name: '百度翻译总字数',
-          count: row.count === null ? 0 : row.count
-        });
-        // 如果全部查询完毕就返回数据
-        if (dataList.length === 2) resolve(dataList);
-      });
+  // 获取翻译字数，用于总览数据
+  getTranslationwordCount(start = 0, provider = 'baidu') {
+    const sql = `
+    SELECT SUM(word_count) AS count FROM translation_history
+    WHERE translation_time >= ? AND provider = ?
+    `;
 
-      // 查询出本月的翻译字数
-      const sql = `
-      SELECT SUM(word_count) AS count
-      FROM translation_history
-      WHERE translation_time > ?
-      `;
-      this.db.get(sql, [Datetime.monthFirstDayTimestamp()], (err, row) => {
-        dataList.push({
-          name: '本月百度翻译字数',
-          count: row.count === null ? 0 : row.count
-        });
-        // 如果全部查询完毕就返回数据
-        if (dataList.length === 2) resolve(dataList);
+    return new Promise(resolve => {
+      this.db.get(sql, [start, provider], (error, row) => {
+        if (error) {
+          resolve(0);
+        }else {
+          resolve(row.count === null ? 0 : row.count);
+        }
       });
     });
+  }
+
+  // 获取翻译历史记录总览数据
+  async getTranslationHistoryOverview() {
+    // 获取本月的时间戳
+    const thisMonth = Datetime.monthFirstDayTimestamp();
+    // 查询百度翻译字数
+    const baidu = [
+      {
+        name: '百度翻译总字数',
+        count: await this.getTranslationwordCount(0, 'baidu')
+      },
+      {
+        name: '本月百度翻译字数',
+        count: await this.getTranslationwordCount(thisMonth, 'baidu')
+      }
+    ];
+    // 查询腾讯翻译字数
+    const tencent = [
+      {
+        name: '腾讯翻译总字数',
+        count: await this.getTranslationwordCount(0, 'tencent')
+      },
+      {
+        name: '本月腾讯翻译字数',
+        count: await this.getTranslationwordCount(thisMonth, 'tencent')
+      }
+    ];
+
+    return {baidu: baidu, tencent: tencent};
   }
 
   // OCR 历史记录的数据表是否存在

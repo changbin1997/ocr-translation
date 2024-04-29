@@ -1,7 +1,6 @@
 const crypto = require('crypto');
 const querystring = require('querystring');
 const axios = require('axios').default;
-const Data = require('./Data');
 
 module.exports = class BaiduTranslation {
   options = null;
@@ -9,7 +8,6 @@ module.exports = class BaiduTranslation {
 
   constructor(optionsObj) {
     this.options = optionsObj;
-    this.data = new Data();
   }
 
   // 生成签名
@@ -67,8 +65,6 @@ module.exports = class BaiduTranslation {
           return false;
         }
 
-        // 添加到翻译历史记录
-        await this.data.addTranslationHistory('baidu', q.length);
         resolve({ result: 'success', data: result.data });
       }).catch(error => {
         if (error.response) {

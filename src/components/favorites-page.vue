@@ -5,11 +5,12 @@
       <div v-for="(item, index) of list" :key="index" class="border-bottom mb-3">
         <div class="mb-2">
           <button class="btn btn-outline-primary btn-sm me-2">
-            <span>{{languageName(item.from)}}</span>
+            <span>{{languageName(item.from, item.provider)}}</span>
             <i class="icon-arrow-right2 mx-2"></i>
-            <span>{{languageName(item.to)}}</span>
+            <span>{{languageName(item.to, item.provider)}}</span>
           </button>
-          <span>{{item.created}}</span>
+          <span class="me-2">{{item.created}}</span>
+          <span>来自{{providerName[item.provider]}}</span>
           <button class="btn btn-light btn-sm float-end" @click="deleteFavorite(index)">删除</button>
         </div>
         <div class="row">
@@ -55,6 +56,7 @@
 <script>
 import Voice from './../modules/voice';
 import languageList from './../modules/language-list';
+
 export default {
   name: 'favorites-page',
   data() {
@@ -63,7 +65,8 @@ export default {
       page: 1,
       list: [],
       btnDisabled: false,
-      voice: null
+      voice: null,
+      providerName: {baidu: '百度翻译', tencent: '腾讯翻译'}
     }
   },
   computed: {
@@ -114,9 +117,13 @@ export default {
       }
     },
     // 通过语言代码获取语言名称
-    languageName(code) {
-      const name = languageList.languageList2.find(item => item.code === code);
-      return name.name;
+    languageName(code, provider) {
+      const language = languageList[provider].languageList2.find(item => item.code === code);
+      if (language === undefined) {
+        return code;
+      }else {
+        return language.name;
+      }
     },
     // 语音朗读
     startVoice(type, index, language) {
@@ -128,7 +135,7 @@ export default {
           name: 'showMessageBox',
           options: {
             title: '没有适合的语音库',
-            message: `您的电脑上缺少 ${this.languageName(language)} 的语音库！`,
+            message: `您的电脑上缺少 ${this.languageName(language, this.list[index].provider)} 的语音库！`,
             buttons: ['关闭'],
             type: 'error',
             noLink: true
@@ -188,8 +195,8 @@ export default {
       }
 
       this.count = result.count;
-      // 把原文和译文拆分为数组
       for (let i = 0;i < result.list.length;i ++) {
+        // 把原文和译文拆分为数组
         result.list[i].src = result.list[i].src.split("\n");
         result.list[i].dst = result.list[i].dst.split("\n");
       }

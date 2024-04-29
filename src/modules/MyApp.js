@@ -1,11 +1,11 @@
 const {dialog, ipcMain, BrowserWindow, clipboard, shell, app, globalShortcut, Tray, Menu} = require('electron');
 const Ocr = require('./Ocr');  // OCR 模块
-const BaiduTranslation = require('./BaiduTranslation');  // 百度翻译模块
 const Data = require('./Data');  // 数据库操作模块
 const ContextMenu = require('./contextMenu');  // 上下文菜单模块
+const Translation = require('./Translation');  // 翻译模块
 const selectorWindow = require('./selector-window');
 const ScreenshotOcr = require('./screenshotOcr');
-const path = require("path"); // 截图模块
+const path = require("path");
 let disabled = false; // 用于禁用截图识别
 let tray = null;  // 用来存储系统托盘
 
@@ -254,11 +254,10 @@ module.exports = class MyApp {
       clipboard.writeText(args);
     });
 
-    // 百度翻译
+    // 翻译
     ipcMain.handle('translation', async (ev, args) => {
-      const baiduTranslation = new BaiduTranslation(args.options);
-      return await baiduTranslation.send(args.q, args.from, args.to);
-    });
+      const translation = new Translation(args.options);
+      return await translation.translation(args.q, args.from, args.to);    });
 
     // 获取选项
     ipcMain.handle('getOptions', async () => {
@@ -301,8 +300,8 @@ module.exports = class MyApp {
     });
 
     // 清空翻译历史记录
-    ipcMain.handle('deleteAllTranslationHistory', async () => {
-      return await this.data.deleteAllTranslationHistory();
+    ipcMain.handle('deleteAllTranslationHistory', async (ev, args) => {
+      return await this.data.deleteAllTranslationHistory(args);
     });
 
     // 清空指定提供商的 OCR 历史记录

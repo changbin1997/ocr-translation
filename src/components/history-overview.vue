@@ -73,9 +73,25 @@
         </div>
       </div>
       <div class="col-lg-3 col-xl-2 col-md-4 mb-3" v-if="baiduTranslation.length">
-        <div class="data-box" @click="deleteAllTranslationHistory" tabindex="0" role="button">
+        <div class="data-box" @click="deleteAllTranslationHistory('baidu')" tabindex="0" role="button">
           <h3 class="text-center">删除</h3>
           <p class="text-center mb-2">删除百度翻译数据</p>
+        </div>
+      </div>
+    </div>
+    <hr>
+    <h2 class="mb-3">腾讯翻译记录</h2>
+    <div class="row">
+      <div class="col-lg-3 col-xl-2 col-md-4 mb-3" v-for="(item, index) of tencentTranslation" :key="index">
+        <div class="data-box">
+          <h3 class="text-center">{{item.count}}</h3>
+          <p class="text-center mb-2">{{item.name}}</p>
+        </div>
+      </div>
+      <div class="col-lg-3 col-xl-2 col-md-4 mb-3" v-if="baiduTranslation.length">
+        <div class="data-box" @click="deleteAllTranslationHistory('tencent')" tabindex="0" role="button">
+          <h3 class="text-center">删除</h3>
+          <p class="text-center mb-2">删除腾讯翻译数据</p>
         </div>
       </div>
     </div>
@@ -91,7 +107,8 @@ export default {
       tencent: [],
       xunfei: [],
       youdao: [],
-      baiduTranslation: []
+      baiduTranslation: [],
+     tencentTranslation: []
     }
   },
   methods: {
@@ -159,19 +176,21 @@ export default {
     // 获取翻译总览数据
     getTranslationData() {
       window.electronAPI.ipcRenderer.invoke('translationHistoryOverview').then(result => {
-        this.baiduTranslation = result;
+        this.baiduTranslation = result.baidu;
+        this.tencentTranslation = result.tencent;
       });
     },
     // 清空翻译历史记录
-    async deleteAllTranslationHistory() {
+    async deleteAllTranslationHistory(provider) {
       // 如果没有数据
-      if (this.baiduTranslation[0].count < 1) return false;
+      if (this[`${provider}Translation`][0].count < 1) return false;
+      const providerName = {baidu: '百度翻译', tencent: '腾讯翻译'};
       // 删除确认
       const btnResult = await window.electronAPI.ipcRenderer.invoke('dialog', {
         name: 'showMessageBox',
         options: {
           title: '删除确认',
-          message: '您确定要删除所有翻译历史记录吗，删除后无法恢复？',
+          message: `您确定要删除 ${providerName[provider]} 历史记录吗，删除后无法恢复？`,
           buttons: ['取消', '确定删除'],
           type: 'warning',
           noLink: true
@@ -179,7 +198,7 @@ export default {
       });
       if (btnResult.response !== 1) return false;
       // 删除
-      const deleteResult = await window.electronAPI.ipcRenderer.invoke('deleteAllTranslationHistory');
+      const deleteResult = await window.electronAPI.ipcRenderer.invoke('deleteAllTranslationHistory', provider);
       // 删除出错
       if (deleteResult.result !== 'success') {
         window.electronAPI.ipcRenderer.invoke('dialog', {
@@ -199,7 +218,7 @@ export default {
         name: 'showMessageBox',
         options: {
           title: '删除完成',
-          message: `已删除 ${deleteResult.count} 条翻译记录`,
+          message: `已删除 ${deleteResult.count} 条 ${providerName[provider]} 记录`,
           buttons: ['关闭'],
           type: 'info',
           noLink: true

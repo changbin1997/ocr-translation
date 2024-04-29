@@ -66,8 +66,8 @@ export default {
     return {
       languageSelected1: 'auto',
       languageSelected2: 'zh',
-      languageList1: languageList.languageList1,
-      languageList2: languageList.languageList2,
+      languageList1: languageList[this.$store.state.options.translationProvider].languageList1,
+      languageList2: languageList[this.$store.state.options.translationProvider].languageList2,
       resultText: '',
       originalText: '',
       disabledSubmitBtn: false,
@@ -120,6 +120,8 @@ export default {
       if (this.favorite) {
         this.deleteFavorite();
       }else {
+        // 设置翻译 API 提供商
+        this.translationResult.provider = this.$store.state.options.translationProvider;
         // 发送 IPC 请求
         const result = await window.electronAPI.ipcRenderer.invoke('addToFavorites', this.translationResult);
         // 是否添加成功
@@ -160,7 +162,9 @@ export default {
         trans_result: this.translationResult.trans_result
       };
       // 设置语言名称
-      const from = this.languageList1.find(item => item.code === exportResult.from);
+      let from = this.languageList1.find(item => item.code === exportResult.from);
+      // 如果找不到原文的语言名称
+      if (from === undefined) from = {code: exportResult.from, name: exportResult.from};
       const to = this.languageList1.find(item => item.code === exportResult.to);
       exportResult.from = `${from.name}（${from.code}）`;
       exportResult.to = `${to.name}（${to.code}）`;
@@ -337,6 +341,10 @@ export default {
           language = this.languageList1.find(item => {
             return item.code === this.translationResult.from;
           });
+          // 如果找不到原文语言
+          if (language === undefined) {
+            language = {code: this.translationResult.from, name: this.translationResult.from};
+          }
         }else {
           window.electronAPI.ipcRenderer.invoke('dialog', {
             name: 'showMessageBox',
@@ -386,19 +394,31 @@ export default {
     },
     // 检查 API 密钥是否填写
     apiInit() {
+      // 检查百度 API 密钥
       if (
           this.$store.state.options.baiduTranslationAppID !== '' &&
-          this.$store.state.options.baiduTranslationApiKey !== ''
+          this.$store.state.options.baiduTranslationApiKey !== '' &&
+          this.$store.state.options.translationProvider === 'baidu'
+      ) {
+        this.available = true;
+      }
+      // 检查腾讯 API 密钥
+      if (
+          this.$store.state.options.tencentOcrAppID !== '' &&
+          this.$store.state.options.tencentOcrSecretID !== '' &&
+          this.$store.state.options.tencentOcrSecretKey !== '' &&
+          this.$store.state.options.translationProvider === 'tencent'
       ) {
         this.available = true;
       }
       // 如果没有填写 API 密钥就弹出提示
       if (!this.available) {
+        const providerName = {baidu: '百度翻译', tencent: '腾讯'};
         window.electronAPI.ipcRenderer.invoke('dialog', {
           name: 'showMessageBox',
           options: {
             title: '没有填写 API 密钥',
-            message: '您还没有填写百度翻译的 API 密钥信息，目前翻译功能暂不可用，请在设置中填写百度翻译的 API 密钥信息！',
+            message: `您当前使用的翻译引擎是 ${providerName[this.$store.state.options.translationProvider]}，您还没有填写 ${providerName[this.$store.state.options.translationProvider]} 的 API 密钥信息，请在设置中填写 ${providerName[this.$store.state.options.translationProvider]} 的 API 密钥信息！`,
             buttons: ['知道了'],
             type: 'info',
             noLink: true

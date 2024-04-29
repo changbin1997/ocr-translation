@@ -103,6 +103,17 @@
         </div>
       </div>
       <div class="mb-4"></div>
+      <p class="mb-2"><b>翻译引擎设置</b></p>
+      <div aria-label="翻译引擎设置" role="group">
+        <div class="mb-3">
+          <label for="translation-provider" class="form-label">默认使用的翻译引擎</label>
+          <select id="translation-provider" class="form-select" v-model="optionsSelected.translationProvider">
+            <option value="baidu">百度翻译</option>
+            <option value="tencent">腾讯翻译</option>
+          </select>
+          <p class="mt-3">腾讯翻译和腾讯 OCR 使用的密钥是一样的，只需要在腾讯云开通机器翻译就可以使用了。</p>
+        </div>
+      </div>
       <!--OCR语音设置-->
       <p class="mb-2"><b>OCR 语音朗读设置</b></p>
       <div aria-label="OCR语音朗读" role="group">
@@ -320,6 +331,7 @@ export default {
         tencentOcrRegionSelected: 'ap-shanghai',
         baiduTranslationAppID: '',
         baiduTranslationApiKey: '',
+        translationProvider: 'baidu',
         ocrVoiceSpeed: 2,
         ocrVoiceVolume: 10,
         ocrVoiceLibrarySelected: '',
