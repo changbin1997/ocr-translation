@@ -147,6 +147,7 @@
           <label for="translation-speed" class="form-label">语音语速</label>
           <input type="range" class="form-range" id="translation-speed" max="10" min="1" v-model="optionsSelected.translationVoiceSpeed">
         </div>
+        <p class="mt-3">翻译朗读的发音人会根据朗读的语言自动选择对应语言的发音人。</p>
       </div>
       <div class="mb-4"></div>
       <!--快捷键-->
@@ -163,6 +164,7 @@
           <label for="key1-name" class="form-label">快捷键1要使用的快捷键</label>
           <input type="text" id="key1-name" class="form-control" placeholder="在这里按下要使用的快捷键" @keydown="getKeyName($event, 'key1Name')" v-model="optionsSelected.key1Name" readonly :disabled="!optionsSelected.key1Enable">
         </div>
+        <p class="mt-3">你可以在上方的表单中按下需要使用的按键来更改快捷键设置</p>
         <div class="mb-3">
           <label for="key-f1-function" class="form-label">快捷键1使用的接口</label>
           <select id="key-f1-function" class="form-select" v-model="optionsSelected.key1Function" :disabled="!optionsSelected.key1Enable">
@@ -188,6 +190,7 @@
           <label for="key2-name" class="form-label">快捷键2要使用的快捷键</label>
           <input type="text" id="key2-name" class="form-control" placeholder="在这里按下要使用的快捷键" @keydown="getKeyName($event, 'key2Name')" v-model="optionsSelected.key2Name" readonly :disabled="!optionsSelected.key2Enable">
         </div>
+        <p class="mt-3">你可以在上方的表单中按下需要使用的按键来更改快捷键设置</p>
         <div class="mb-3">
           <label for="key-f2-function" class="form-label">快捷键2使用的接口</label>
           <select id="key-f2-function" class="form-select" v-model="optionsSelected.key2Function" :disabled="!optionsSelected.key2Enable">
@@ -217,6 +220,7 @@
           <label for="specific-areaKey-name" class="form-label">指定区域识别要使用的快捷键</label>
           <input type="text" id="specific-areaKey-name" class="form-control" placeholder="在这里按下要使用的快捷键" @keydown="getKeyName($event, 'specificAreaKeyName')" v-model="optionsSelected.specificAreaKeyName" readonly :disabled="!optionsSelected.specificArea">
         </div>
+        <p class="mt-3">你可以在上方的表单中按下需要使用的按键来更改快捷键设置</p>
         <div class="mb-3">
           <label for="specific-area-left" class="form-label">识别区域左侧起始位置</label>
           <input type="number" id="specific-area-left" class="form-control" placeholder="识别区域左侧起始位置（px）" v-model="optionsSelected.specificAreaLeft" :disabled="!optionsSelected.specificArea">
@@ -287,6 +291,7 @@
           <label for="clipboard-translation-key-name" class="form-label">翻译剪贴板要使用的快捷键</label>
           <input type="text" id="clipboard-translation-key-name" class="form-control" placeholder="在这里按下要使用的快捷键" @keydown="getKeyName($event, 'clipboardTranslationKeyName')" v-model="optionsSelected.clipboardTranslationKeyName" readonly :disabled="!optionsSelected.clipboardTranslation">
         </div>
+        <p class="mt-3">你可以在上方的表单中按下需要使用的按键来更改快捷键设置</p>
       </div>
       <div class="mb-4"></div>
       <div>
@@ -300,6 +305,7 @@
         <li>OCR 识别完成后自动朗读和自动翻译不能同时开启，开启自动翻译后 OCR 自动朗读会被取消</li>
         <li>翻译朗读的发音人会根据翻译的语言自动选择对应语言的发音人</li>
         <li>Windows10 及以上的系统可以在 设置 - 时间和语言 - 语音 - 已安装的语音包添加语音库</li>
+        <li>快捷键不建议使用单独的一个 Ctrl 或 Shift 之类的按键，这些按键是 Windows 的快捷键，设置后可能无法成功绑定。如果需要使用 Ctrl 或 Shift 的话，可以使用 Ctrl + 按键2 之类的组合方式。</li>
       </ol>
     </div>
   </div>

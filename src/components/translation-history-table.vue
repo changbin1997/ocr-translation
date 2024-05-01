@@ -11,7 +11,7 @@
       </thead>
       <tbody>
       <tr v-for="(item, index) of translationList" :key="index">
-        <td>{{item.provider}}</td>
+        <td>{{providerName[item.provider]}}</td>
         <td>{{item.word_count}}</td>
         <td>{{item.translation_time}}</td>
       </tr>
@@ -35,7 +35,8 @@ export default {
       count: 0,
       translationList: [],
       pageCount: 0,
-      pageNum: 1
+      pageNum: 1,
+      providerName: {baidu: '百度翻译', tencent: '腾讯翻译'}
     }
   },
   methods: {
@@ -83,7 +84,3 @@ export default {
   }
 }
 </script>
-
-<style scoped>
-
-</style>
