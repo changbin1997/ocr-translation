@@ -44,6 +44,17 @@ export default class Voice {
     return exist;
   }
 
+  // 更改语音库
+  changeVoiceLibrary(name) {
+    // 获取语音库列表
+    const voiceLibraryList = this.synth.getVoices();
+    this.voiceLibrary = voiceLibraryList.find(item => item.name === name);
+    // 找不到语音库
+    if (this.voiceLibrary === undefined) return false;
+    this.voiceLibraryName = this.voiceLibrary.name;
+    return true;
+  }
+
   // 开始朗读
   start(options) {
     // 设置合成的文本内容

@@ -147,7 +147,14 @@
           <label for="translation-speed" class="form-label">语音语速</label>
           <input type="range" class="form-range" id="translation-speed" max="10" min="1" v-model="optionsSelected.translationVoiceSpeed">
         </div>
-        <p class="mt-3">翻译朗读的发音人会根据朗读的语言自动选择对应语言的发音人。</p>
+        <div class="mb-3">
+          <label for="ocr-voice-library" class="form-label">发音人</label>
+          <select id="translation-voice-library" class="form-select" v-model="optionsSelected.translationVoiceLibrarySelected">
+            <option value="auto">根据语言自动选择</option>
+            <option v-for="(item, index) of voiceLibraryList" :key="index" v-bind:value="item.name">{{item.name}} {{item.lang}}</option>
+          </select>
+        </div>
+        <p class="mt-3">如果您对发音人没有特别需求的话，可以使用根据语言自动选择发音人。</p>
       </div>
       <div class="mb-4"></div>
       <!--快捷键-->
@@ -303,7 +310,6 @@
         <li>中文发音人可以朗读中文和英文</li>
         <li>英文发音人只能朗读英文</li>
         <li>OCR 识别完成后自动朗读和自动翻译不能同时开启，开启自动翻译后 OCR 自动朗读会被取消</li>
-        <li>翻译朗读的发音人会根据翻译的语言自动选择对应语言的发音人</li>
         <li>Windows10 及以上的系统可以在 设置 - 时间和语言 - 语音 - 已安装的语音包添加语音库</li>
         <li>快捷键不建议使用单独的一个 Ctrl 或 Shift 之类的按键，这些按键是 Windows 的快捷键，设置后可能无法成功绑定。如果需要使用 Ctrl 或 Shift 的话，可以使用 Ctrl + 按键2 之类的组合方式。</li>
       </ol>
@@ -343,6 +349,7 @@ export default {
         ocrVoiceLibrarySelected: '',
         translationVoiceSpeed: 2,
         translationVoiceVolume: 10,
+        translationVoiceLibrarySelected: 'auto',
         key1Enable: false,
         key1Name: 'F1',
         key1Function: '百度云通用文字识别（标准版）',

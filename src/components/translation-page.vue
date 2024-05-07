@@ -327,30 +327,64 @@ export default {
     startVoice(text, type) {
       if (text === '') return false;
       let language = '';
-      if (type === 'result') {
-        // 获取译文语言名称
-        if (this.translationResult === null) return false;
-        language = this.languageList1.find(item => {
-          return item.code === this.translationResult.to;
-        });
-      }else {
-        // 获取原文语言名称
-        if (this.languageSelected1 !== 'auto') {
-          language = this.languageList1.find(item => item.code === this.languageSelected1);
-        }else if (this.translationResult !== null) {
+
+      // 如果设置了自动选择语音库
+      if (this.$store.state.options.translationVoiceLibrarySelected === 'auto') {
+        if (type === 'result') {
+          // 获取译文语言名称
+          if (this.translationResult === null) return false;
           language = this.languageList1.find(item => {
-            return item.code === this.translationResult.from;
+            return item.code === this.translationResult.to;
           });
-          // 如果找不到原文语言
-          if (language === undefined) {
-            language = {code: this.translationResult.from, name: this.translationResult.from};
-          }
         }else {
+          // 获取原文语言名称
+          if (this.languageSelected1 !== 'auto') {
+            language = this.languageList1.find(item => item.code === this.languageSelected1);
+          }else if (this.translationResult !== null) {
+            language = this.languageList1.find(item => {
+              return item.code === this.translationResult.from;
+            });
+            // 如果找不到原文语言
+            if (language === undefined) {
+              language = {code: this.translationResult.from, name: this.translationResult.from};
+            }
+          }else {
+            window.electronAPI.ipcRenderer.invoke('dialog', {
+              name: 'showMessageBox',
+              options: {
+                title: '原文语言未知',
+                message: `请先选择原文语言或等待翻译完成后再收听原文朗读！`,
+                buttons: ['关闭'],
+                type: 'error',
+                noLink: true
+              }
+            });
+            return false;
+          }
+        }
+
+        // 寻找指定语言的语音库
+        if (!this.voice.changeLanguage(language.code)) {
           window.electronAPI.ipcRenderer.invoke('dialog', {
             name: 'showMessageBox',
             options: {
-              title: '原文语言未知',
-              message: `请先选择原文语言或等待翻译完成后再收听原文朗读！`,
+              title: '没有适合的语音库',
+              message: `您的电脑上缺少 ${language.name} 的语音库！`,
+              buttons: ['关闭'],
+              type: 'error',
+              noLink: true
+            }
+          });
+          return false;
+        }
+      }else {
+        // 指定语音库
+        if (!this.voice.changeVoiceLibrary(this.$store.state.options.translationVoiceLibrarySelected)) {
+          window.electronAPI.ipcRenderer.invoke('dialog', {
+            name: 'showMessageBox',
+            options: {
+              title: '没有适合的语音库',
+              message: `您设置的语音库 ${this.$store.state.options.translationVoiceLibrarySelected} 在您的电脑上无法找到！`,
               buttons: ['关闭'],
               type: 'error',
               noLink: true
@@ -359,20 +393,7 @@ export default {
           return false;
         }
       }
-      // 寻找指定语言的语音库
-      if (!this.voice.changeLanguage(language.code)) {
-        window.electronAPI.ipcRenderer.invoke('dialog', {
-          name: 'showMessageBox',
-          options: {
-            title: '没有适合的语音库',
-            message: `您的电脑上缺少 ${language.name} 的语音库！`,
-            buttons: ['关闭'],
-            type: 'error',
-            noLink: true
-          }
-        });
-        return false;
-      }
+
       // 开始朗读
       this.voice.start({
         text: text,
@@ -455,11 +476,13 @@ export default {
   },
   created() {
     document.title = '翻译';
-    // 初始化语音朗读
+
+    // 初始化语音
     this.voice = new Voice({
       volume: this.$store.state.options.translationVoiceVolume / 10,
       speed: this.$store.state.options.translationVoiceSpeed
     });
+
     // 检查 API 密钥
     this.apiInit();
     // 检查自动翻译

@@ -265,6 +265,7 @@ module.exports = class Data {
       ocrVoiceLibrarySelected: '',
       translationVoiceVolume: 10,
       translationVoiceSpeed: 2,
+      translationVoiceLibrarySelected: 'auto',
       key1Enable: false,
       key1Function: '百度云通用文字识别（标准版）',
       key1Provider: 'baidu',
