@@ -257,7 +257,8 @@ module.exports = class MyApp {
     // 翻译
     ipcMain.handle('translation', async (ev, args) => {
       const translation = new Translation(args.options);
-      return await translation.translation(args.q, args.from, args.to);    });
+      return await translation.translation(args.q, args.from, args.to);
+    });
 
     // 获取选项
     ipcMain.handle('getOptions', async () => {

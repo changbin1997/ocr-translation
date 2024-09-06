@@ -859,8 +859,19 @@ module.exports = class Data {
         count: await this.getTranslationwordCount(thisMonth, 'tencent')
       }
     ];
+    // 查询讯飞翻译字数
+    const xunfei = [
+      {
+        name: '讯飞翻译总字数',
+        count: await this.getTranslationwordCount(0, 'xunfei')
+      },
+      {
+        name: '本月讯飞翻译字数',
+        count: await this.getTranslationwordCount(thisMonth, 'xunfei')
+      }
+    ];
 
-    return {baidu: baidu, tencent: tencent};
+    return {baidu: baidu, tencent: tencent, xunfei: xunfei};
   }
 
   // OCR 历史记录的数据表是否存在

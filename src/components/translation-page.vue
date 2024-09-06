@@ -432,9 +432,18 @@ export default {
       ) {
         this.available = true;
       }
+      // 检查讯飞 API 密钥
+      if (
+          this.$store.state.options.xunfeiOcrAPPId !== '' &&
+          this.$store.state.options.xunfeiOcrAPISecret !== '' &&
+          this.$store.state.options.xunfeiOcrAPIKey !== '' &&
+          this.$store.state.options.translationProvider === 'xunfei'
+      ) {
+        this.available = true;
+      }
       // 如果没有填写 API 密钥就弹出提示
       if (!this.available) {
-        const providerName = {baidu: '百度翻译', tencent: '腾讯'};
+        const providerName = {baidu: '百度翻译', tencent: '腾讯', xunfei: '讯飞'};
         window.electronAPI.ipcRenderer.invoke('dialog', {
           name: 'showMessageBox',
           options: {
@@ -476,6 +485,11 @@ export default {
   },
   created() {
     document.title = '翻译';
+    // 如果是讯飞翻译就更改默认语言选项
+    if (this.$store.state.options.translationProvider === 'xunfei') {
+      this.languageSelected1 = 'en';
+      this.languageSelected2 = 'cn';
+    }
 
     // 初始化语音
     this.voice = new Voice({

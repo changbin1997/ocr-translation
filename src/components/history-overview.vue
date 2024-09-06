@@ -1,5 +1,6 @@
 <template>
   <div id="history-overview">
+    <!--百度OCR 记录-->
     <h2 class="mb-3">百度 OCR 记录</h2>
     <div class="row">
       <div class="col-lg-3 col-xl-2 col-md-4 mb-3" v-for="(item, index) of baidu" :key="index">
@@ -16,6 +17,7 @@
       </div>
     </div>
     <hr>
+    <!--腾讯OCR记录-->
     <h2 class="mb-3">腾讯 OCR 记录</h2>
     <div class="row">
       <div class="col-lg-3 col-xl-2 col-md-4 mb-3" v-for="(item, index) of tencent" :key="index">
@@ -32,6 +34,7 @@
       </div>
     </div>
     <hr>
+    <!--讯飞OCR记录-->
     <h2 class="mb-3">科大讯飞 OCR 记录</h2>
     <div class="row">
       <div class="col-lg-3 col-xl-2 col-md-4 mb-3" v-for="(item, index) of xunfei" :key="index">
@@ -48,6 +51,7 @@
       </div>
     </div>
     <hr>
+    <!--有道OCR记录-->
     <h2 class="mb-3">有道智云 OCR 记录</h2>
     <div class="row">
       <div class="col-lg-3 col-xl-2 col-md-4 mb-3" v-for="(item, index) of youdao" :key="index">
@@ -64,6 +68,7 @@
       </div>
     </div>
     <hr>
+    <!--百度翻译记录-->
     <h2 class="mb-3">百度翻译记录</h2>
     <div class="row">
       <div class="col-lg-3 col-xl-2 col-md-4 mb-3" v-for="(item, index) of baiduTranslation" :key="index">
@@ -80,6 +85,7 @@
       </div>
     </div>
     <hr>
+    <!--腾讯翻译记录-->
     <h2 class="mb-3">腾讯翻译记录</h2>
     <div class="row">
       <div class="col-lg-3 col-xl-2 col-md-4 mb-3" v-for="(item, index) of tencentTranslation" :key="index">
@@ -88,10 +94,27 @@
           <p class="text-center mb-2">{{item.name}}</p>
         </div>
       </div>
-      <div class="col-lg-3 col-xl-2 col-md-4 mb-3" v-if="baiduTranslation.length">
+      <div class="col-lg-3 col-xl-2 col-md-4 mb-3" v-if="tencentTranslation.length">
         <div class="data-box" @click="deleteAllTranslationHistory('tencent')" tabindex="0" role="button">
           <h3 class="text-center">删除</h3>
           <p class="text-center mb-2">删除腾讯翻译数据</p>
+        </div>
+      </div>
+    </div>
+    <hr>
+    <!--讯飞翻译记录-->
+    <h2 class="mb-3">讯飞翻译记录</h2>
+    <div class="row">
+      <div class="col-lg-3 col-xl-2 col-md-4 mb-3" v-for="(item, index) of xunfeiTranslation" :key="index">
+        <div class="data-box">
+          <h3 class="text-center">{{item.count}}</h3>
+          <p class="text-center mb-2">{{item.name}}</p>
+        </div>
+      </div>
+      <div class="col-lg-3 col-xl-2 col-md-4 mb-3" v-if="xunfeiTranslation.length">
+        <div class="data-box" @click="deleteAllTranslationHistory('xunfei')" tabindex="0" role="button">
+          <h3 class="text-center">删除</h3>
+          <p class="text-center mb-2">删除讯飞翻译数据</p>
         </div>
       </div>
     </div>
@@ -108,7 +131,8 @@ export default {
       xunfei: [],
       youdao: [],
       baiduTranslation: [],
-     tencentTranslation: []
+      tencentTranslation: [],
+      xunfeiTranslation: []
     }
   },
   methods: {
@@ -178,13 +202,14 @@ export default {
       window.electronAPI.ipcRenderer.invoke('translationHistoryOverview').then(result => {
         this.baiduTranslation = result.baidu;
         this.tencentTranslation = result.tencent;
+        this.xunfeiTranslation = result.xunfei;
       });
     },
     // 清空翻译历史记录
     async deleteAllTranslationHistory(provider) {
       // 如果没有数据
       if (this[`${provider}Translation`][0].count < 1) return false;
-      const providerName = {baidu: '百度翻译', tencent: '腾讯翻译'};
+      const providerName = {baidu: '百度翻译', tencent: '腾讯翻译', xunfei: '讯飞翻译'};
       // 删除确认
       const btnResult = await window.electronAPI.ipcRenderer.invoke('dialog', {
         name: 'showMessageBox',
