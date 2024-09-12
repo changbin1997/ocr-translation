@@ -2,6 +2,7 @@ const Data = require('./Data');
 const TmtClient = require('tencentcloud-sdk-nodejs').tmt.v20180321.Client;
 const BaiduTranslation = require('./BaiduTranslation');  // 百度翻译模块
 const XunfeiTranslation = require('./XunfeiTranslation');  // 讯飞翻译模块
+const YoudaoTranslation = require('./YoudaoTranslation');  // 有道翻译模块
 
 module.exports = class Translation {
   options = null;
@@ -30,13 +31,21 @@ module.exports = class Translation {
     return await  baiduTranslation.send(q, from, to);
   }
 
+  // 有道翻译
+  async youdao(q, from = 'auto', to = 'zh-CHS') {
+    const appid = this.options.youdaoOcrAppID;
+    const appkey = this.options.youdaoOcrAppKey;
+    const youdaoTranslation = new YoudaoTranslation(appid, appkey);
+    return youdaoTranslation.submit(q, from, to);
+  }
+
   // 讯飞翻译
-  async xunfei(q, from = 'auto', to = 'cn') {
+  async xunfei(q, from = 'en', to = 'cn') {
     const APPId = this.options.xunfeiOcrAPPId;
     const APISecret = this.options.xunfeiOcrAPISecret;
     const APIKey = this.options.xunfeiOcrAPIKey;
     const xunfeiTranslation = new XunfeiTranslation(APPId, APISecret, APIKey);
-    return await xunfeiTranslation.submit(q, from, to);
+    return xunfeiTranslation.submit(q, from, to);
   }
 
   // 腾讯翻译

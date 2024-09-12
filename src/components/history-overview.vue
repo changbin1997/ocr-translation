@@ -118,6 +118,23 @@
         </div>
       </div>
     </div>
+    <hr>
+    <!--有道翻译记录-->
+    <h2 class="mb-3">有道翻译记录</h2>
+    <div class="row">
+      <div class="col-lg-3 col-xl-2 col-md-4 mb-3" v-for="(item, index) of youdaoTranslation" :key="index">
+        <div class="data-box">
+          <h3 class="text-center">{{item.count}}</h3>
+          <p class="text-center mb-2">{{item.name}}</p>
+        </div>
+      </div>
+      <div class="col-lg-3 col-xl-2 col-md-4 mb-3" v-if="youdaoTranslation.length">
+        <div class="data-box" @click="deleteAllTranslationHistory('youdao')" tabindex="0" role="button">
+          <h3 class="text-center">删除</h3>
+          <p class="text-center mb-2">删除有道翻译数据</p>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -132,7 +149,8 @@ export default {
       youdao: [],
       baiduTranslation: [],
       tencentTranslation: [],
-      xunfeiTranslation: []
+      xunfeiTranslation: [],
+      youdaoTranslation: []
     }
   },
   methods: {
@@ -203,13 +221,14 @@ export default {
         this.baiduTranslation = result.baidu;
         this.tencentTranslation = result.tencent;
         this.xunfeiTranslation = result.xunfei;
+        this.youdaoTranslation = result.youdao;
       });
     },
     // 清空翻译历史记录
     async deleteAllTranslationHistory(provider) {
       // 如果没有数据
       if (this[`${provider}Translation`][0].count < 1) return false;
-      const providerName = {baidu: '百度翻译', tencent: '腾讯翻译', xunfei: '讯飞翻译'};
+      const providerName = {baidu: '百度翻译', tencent: '腾讯翻译', xunfei: '讯飞翻译', youdao: '有道翻译'};
       // 删除确认
       const btnResult = await window.electronAPI.ipcRenderer.invoke('dialog', {
         name: 'showMessageBox',

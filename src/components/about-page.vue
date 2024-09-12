@@ -17,6 +17,7 @@
         <li>百度翻译 - 通用文本翻译</li>
         <li>腾讯机器翻译 - 文本翻译</li>
         <li>讯飞机器翻译 - 机器翻译</li>
+        <li>有道翻译 - 文字翻译</li>
       </ul>
       <p>上面是目前支持调用的 API 服务，如果后续找到还可以的提供免费额度的 API 服务，我也会加进去。</p>
       <p>本软件由 changbin1997 开发，使用 MIT License 开源。</p>
@@ -31,7 +32,8 @@
       <p>有道智云 OCR：<a href="https://ai.youdao.com/product-ocr-print.s" @click="openLink">https://ai.youdao.com/product-ocr-print.s</a></p>
       <p>百度翻译：<a href="https://fanyi-api.baidu.com/" @click="openLink">https://fanyi-api.baidu.com/</a></p>
       <p>腾讯机器翻译：<a href="https://cloud.tencent.com/product/tmt" @click="openLink">https://cloud.tencent.com/product/tmt</a></p>
-      <p>腾讯机器翻译：<a href="https://www.xfyun.cn/services/xftrans" @click="openLink">https://www.xfyun.cn/services/xftrans</a></p>
+      <p>讯飞翻译：<a href="https://www.xfyun.cn/services/xftrans" @click="openLink">https://www.xfyun.cn/services/xftrans</a></p>
+      <p>有道翻译：<a href="https://ai.youdao.com/product-fanyi-text.s" @click="openLink">https://ai.youdao.com/product-fanyi-text.s</a></p>
       <p>下面是 API 的免费额度说明：</p>
       <ul>
         <li>百度通用文字识别：每月 1000 次免费</li>

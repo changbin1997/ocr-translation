@@ -870,8 +870,19 @@ module.exports = class Data {
         count: await this.getTranslationwordCount(thisMonth, 'xunfei')
       }
     ];
+    // 查询有道翻译字数
+    const youdao = [
+      {
+        name: '有道翻译总字数',
+        count: await this.getTranslationwordCount(0, 'youdao')
+      },
+      {
+        name: '本月有道翻译字数',
+        count: await this.getTranslationwordCount(thisMonth, 'youdao')
+      }
+    ];
 
-    return {baidu: baidu, tencent: tencent, xunfei: xunfei};
+    return {baidu: baidu, tencent: tencent, xunfei: xunfei, youdao: youdao};
   }
 
   // OCR 历史记录的数据表是否存在

@@ -72,8 +72,8 @@
       </div>
       <div class="mb-4"></div>
       <!--有道 OCR 接口-->
-      <p class="mb-2"><b>有道智云 OCR 接口</b></p>
-      <div aria-label="有道智云 OCR 接口" role="group">
+      <p class="mb-2"><b>有道智云 API 接口</b></p>
+      <div aria-label="有道智云 API 接口" role="group">
         <div class="mb-3">
           <label for="youdao-app-id" class="form-label">App ID</label>
           <input type="text" id="youdao-app-id" class="form-control" placeholder="有道智云 OCR 的 App ID" v-model="optionsSelected.youdaoOcrAppID">
@@ -112,8 +112,9 @@
             <option value="baidu">百度翻译</option>
             <option value="tencent">腾讯翻译</option>
             <option value="xunfei">讯飞翻译</option>
+            <option value="youdao">有道翻译</option>
           </select>
-          <p class="mt-3">腾讯翻译和腾讯 OCR 使用的是相同的密钥信息，讯飞翻译和讯飞 OCR 使用的也是相同的密钥信息，只需要填写了对应的 API 信息，在腾讯云或科大讯飞官网开通机器翻译就可以使用了。</p>
+          <p class="mt-3">腾讯、讯飞、有道的 OCR 和翻译使用的是相同的密钥信息，只需要开通功能就可以使用了。</p>
         </div>
       </div>
       <!--OCR语音设置-->
