@@ -30,7 +30,7 @@
       </div>
       <!--译文操作区域-->
       <div class="btn-group btn-box">
-        <button type="button" title="朗读译文" class="btn" :disabled="resultText.length < 1 || disabledVoiceBtn" @click="startVoice(resultText, 'result')">
+        <button type="button" title="朗读译文" class="btn" :disabled="resultText.length < 1 || disabledVoiceBtn" @click="startVoice(resultText)">
           <i class="icon-volume-medium me-1"></i>
           <span>朗读</span>
         </button>
@@ -357,7 +357,7 @@ export default {
       this.translationResult = result.data;
       // 如果开启了翻译完成后自动朗读就朗读译文
       if (this.$store.state.auto === '识别完成后自动翻译和朗读译文' || this.$store.state.options.translationAutoVoice) {
-        this.startVoice(this.resultText, 'result');
+        this.startVoice(this.resultText);
       }
       // 清除自动执行
       this.$store.commit('changeAuto', '');
@@ -394,7 +394,7 @@ export default {
       // 把翻译结果传一份到 data，方便用于收藏
       this.translationResult = result;
       // 朗读译文
-      this.startVoice(this.resultText, 'result');
+      this.startVoice(this.resultText);
     },
     /**
      * 清空翻译内容、结果、收藏状态和自动执行状态
@@ -416,44 +416,17 @@ export default {
      * @param {string} type 朗读类型，'original' 为原文，'result' 为译文
      * @returns {void|false} 若无音频库或文本为空则返回 false，否则无返回值
      */
-    startVoice(text, type) {
+    startVoice(text) {
       if (text === '') return false;
       let language = '';
 
       // 如果设置了自动选择语音库
       if (this.$store.state.options.translationVoiceLibrarySelected === 'auto') {
-        if (type === 'result') {
-          // 获取译文语言名称
-          if (this.translationResult === null) return false;
-          language = this.languageList1.find(item => {
-            return item.code === this.translationResult.to;
-          });
-        }else {
-          // 获取原文语言名称
-          if (this.languageSelected1 !== 'auto') {
-            language = this.languageList1.find(item => item.code === this.languageSelected1);
-          }else if (this.translationResult !== null) {
-            language = this.languageList1.find(item => {
-              return item.code === this.translationResult.from;
-            });
-            // 如果找不到原文语言
-            if (language === undefined) {
-              language = {code: this.translationResult.from, name: this.translationResult.from};
-            }
-          }else {
-            window.electronAPI.ipcRenderer.invoke('dialog', {
-              name: 'showMessageBox',
-              options: {
-                title: '原文语言未知',
-                message: `请先选择原文语言或等待翻译完成后再收听原文朗读！`,
-                buttons: ['关闭'],
-                type: 'error',
-                noLink: true
-              }
-            });
-            return false;
-          }
-        }
+        // 获取译文语言名称
+        if (this.translationResult === null) return false;
+        language = this.languageList1.find(item => {
+          return item.code === this.translationResult.to;
+        });
 
         // 寻找指定语言的语音库
         if (!this.voice.changeLanguage(language.code)) {
