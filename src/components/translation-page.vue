@@ -635,6 +635,12 @@ export default {
   created() {
     document.title = '翻译 - OCRanslate';
 
+    // 初始化语音
+    this.voice = new Voice({
+      volume: this.$store.state.options.translationVoiceVolume / 10,
+      speed: this.$store.state.options.translationVoiceSpeed
+    });
+
     // 如果路由中包含显示翻译结果
     if (this.$route.query.type === '显示翻译结果') {
       // 如果当前提供商不是快捷键翻译的提供商，或还没有加载语言列表就根据快捷键翻译的提供商加载语言列表
@@ -655,12 +661,6 @@ export default {
       }
     }
     
-    // 初始化语音
-    this.voice = new Voice({
-      volume: this.$store.state.options.translationVoiceVolume / 10,
-      speed: this.$store.state.options.translationVoiceSpeed
-    });
-
     // 检查 API 密钥
     this.apiInit();
     // 如果路由中包含 OCR 翻译
